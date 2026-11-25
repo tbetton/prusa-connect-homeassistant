@@ -20,7 +20,7 @@
     "prusa_connect"
   ],
   "requirements": [],
-  "version": "0.2.2",
+  "version": "0.2.3",
   "zeroconf": [
     "_prusa-connect._tcp.local."
   ]

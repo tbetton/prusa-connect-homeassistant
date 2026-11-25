@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
+import voluptuous as vol
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -23,12 +24,15 @@ from homeassistant.const import (
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
-from .const import PRUSA_STATES
+from .const import DOMAIN, PRUSA_STATES
 from .coordinator import PrusaConnectConfigEntry, PrusaConnectCoordinator
 from .entity import (
     PrusaConnectEntity,
@@ -39,10 +43,14 @@ from .entity import (
     printer_device_info,
     tool_placeholders,
 )
-from .library import Device, Tool, parse_tool_id
+from .helpers import command
+from .library import VERB_DIALOG_ACTION, Device, Tool, parse_tool_id
 from .materials import MaterialsCoordinator, ToolSpool
 
 PARALLEL_UPDATES = 0
+
+SERVICE_PRESS_DIALOG_BUTTON = "press_dialog_button"
+ATTR_BUTTON = "button"
 
 
 def _job_value[T](getter: Callable[[Device], T | None]) -> Callable[[Device], T | None]:
@@ -239,6 +247,7 @@ SLOT_SENSORS: tuple[ToolSensorDescription, ...] = (
 def _entities(coordinator: PrusaConnectCoordinator, device: Device) -> Iterator[Entity]:
     yield PrinterStateSensor(coordinator, device)
     yield StartTimeSensor(coordinator, device)
+    yield DialogSensor(coordinator, device)
     for description in PRINTER_SENSORS:
         if description.exists_fn(device):
             yield PrinterSensor(coordinator, device, description)
@@ -259,6 +268,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensors."""
     async_add_entities_as_found(entry, async_add_entities, _entities)
+    entity_platform.async_get_current_platform().async_register_entity_service(
+        SERVICE_PRESS_DIALOG_BUTTON,
+        {vol.Required(ATTR_BUTTON): cv.string},
+        "async_press_dialog_button",
+    )
     coordinator = entry.runtime_data
     materials = coordinator.materials
     if materials is None:
@@ -470,3 +484,51 @@ class SpoolSensor(CoordinatorEntity[MaterialsCoordinator], SensorEntity):
             "notes": spool.notes,
             "material_uuid": spool.material_uuid,
         }
+
+
+class DialogSensor(PrusaConnectEntity, SensorEntity):
+    """The dialog the printer waits on: its title, with its text and buttons as attributes.
+
+    Its ``press_dialog_button`` action answers the dialog.
+    """
+
+    _attr_translation_key = "dialog"
+
+    def __init__(self, coordinator: PrusaConnectCoordinator, device: Device) -> None:
+        super().__init__(coordinator, device, "dialog_message")
+
+    @property
+    def native_value(self) -> str | None:
+        device = self.device
+        dialog = device.dialog if device else None
+        if dialog is None:
+            return None
+        return (dialog.title or dialog.text or dialog.code or dialog.id)[:255]
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        device = self.device
+        dialog = device.dialog if device else None
+        if dialog is None:
+            return {"dialog_id": None, "code": None, "text": None, "buttons": []}
+        return {
+            "dialog_id": dialog.id,
+            "code": dialog.code,
+            "text": dialog.text,
+            "buttons": list(dialog.buttons),
+        }
+
+    @command
+    async def async_press_dialog_button(self, button: str) -> None:
+        device = self.device
+        if device is None or device.dialog is None:
+            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_dialog")
+        if not device.supports(VERB_DIALOG_ACTION) or not device.may("operate"):
+            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="command_unsupported")
+        if not any(b.casefold() == button.casefold() for b in device.dialog.buttons):
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="no_such_button",
+                translation_placeholders={"button": button, "buttons": ", ".join(device.dialog.buttons)},
+            )
+        await self.coordinator.client.dialog_action(device, button, dialog_id=device.dialog.id)

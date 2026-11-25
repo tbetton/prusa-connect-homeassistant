@@ -32,6 +32,11 @@ VERB_SET_CHAMBER_TEMPERATURE = "core.command.set_chamber_target_temp"
 VERB_SET_CHAMBER_FAN = "core.command.set_chamber_fan_target"
 VERB_SET_CHAMBER_LIGHT = "core.command.set_chamber_led_intensity"
 
+VERB_DIALOG_ACTION = "core.command.dialog_action"
+# The arguments of VERB_DIALOG_ACTION: the dialog answered and the button pressed.
+ARG_DIALOG_ID = "dialog_id"
+ARG_BUTTON = "button"
+
 # The chamber fan target that hands the fans back to the printer's own control.
 CHAMBER_FAN_AUTOMATIC = -1
 
@@ -504,6 +509,23 @@ class Device:
         return _float(self.state.get("/flow"))
 
     @property
+    def dialog(self) -> Dialog | None:
+        """The dialog the printer waits on, or ``None`` when it shows none."""
+        dialog_id = self.state.get("/dialog/id")
+        if dialog_id is None or dialog_id == "":
+            return None
+        raw = self.state.get("/dialog/buttons", self.state.get("/dialog/button"))
+        buttons = tuple(str(b) for b in raw) if isinstance(raw, (list, tuple)) else ()
+        code = self.state.get("/dialog/code")
+        return Dialog(
+            id=str(dialog_id),
+            code=None if code is None else str(code),
+            title=_str(self.state.get("/dialog/title")) or None,
+            text=_str(self.state.get("/dialog/text")) or None,
+            buttons=buttons,
+        )
+
+    @property
     def chamber_temp(self) -> float | None:
         return _float(self.state.get("/temperature/chamber"))
 
@@ -622,6 +644,17 @@ class Snapshot:
     content: bytes
     content_type: str
     last_modified: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Dialog:
+    """A message the printer shows and waits on, with the buttons that answer it."""
+
+    id: str
+    code: str | None
+    title: str | None
+    text: str | None
+    buttons: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)

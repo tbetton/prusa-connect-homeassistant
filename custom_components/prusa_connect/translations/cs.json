@@ -174,6 +174,33 @@
         "name": "Kamera {camera}"
       }
     },
+    "event": {
+      "print": {
+        "name": "Tisk",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "started": "Zahájen",
+              "finished": "Dokončen",
+              "failed": "Selhal",
+              "cancelled": "Zrušen",
+              "unknown": "Ukončen"
+            }
+          }
+        }
+      },
+      "dialog": {
+        "name": "Dialog",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "opened": "Otevřen",
+              "closed": "Zavřen"
+            }
+          }
+        }
+      }
+    },
     "fan": {
       "chamber_fan": {
         "name": "Ventilátor komory",
@@ -348,6 +375,23 @@
       },
       "slot_spool": {
         "name": "Nástroj {tool} slot {slot} cívka"
+      },
+      "dialog": {
+        "name": "Dialog",
+        "state_attributes": {
+          "dialog_id": {
+            "name": "ID dialogu"
+          },
+          "code": {
+            "name": "Kód"
+          },
+          "text": {
+            "name": "Text"
+          },
+          "buttons": {
+            "name": "Tlačítka"
+          }
+        }
       }
     },
     "update": {
@@ -371,6 +415,24 @@
     },
     "command_failed": {
       "message": "Odeslání příkazu selhalo: {error}"
+    },
+    "no_dialog": {
+      "message": "Tiskárna nezobrazuje žádný dialog"
+    },
+    "no_such_button": {
+      "message": "Dialog nemá tlačítko {button}; jeho tlačítka: {buttons}"
+    }
+  },
+  "services": {
+    "press_dialog_button": {
+      "name": "Stisknout tlačítko dialogu",
+      "description": "Odpoví na dialog zobrazený tiskárnou, jako by bylo tlačítko stisknuto na jejím displeji.",
+      "fields": {
+        "button": {
+          "name": "Tlačítko",
+          "description": "Tlačítko ke stisknutí, jak ho dialog pojmenovává (na velikosti písmen nezáleží)."
+        }
+      }
     }
   }
 }

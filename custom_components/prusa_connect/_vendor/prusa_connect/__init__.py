@@ -22,6 +22,8 @@ from .exceptions import (
     UnsupportedError,
 )
 from .models import (
+    ARG_BUTTON,
+    ARG_DIALOG_ID,
     ARG_TOOL,
     CHAMBER_FAN_AUTOMATIC,
     EVENT_ARRIVED,
@@ -38,6 +40,7 @@ from .models import (
     MATERIALS_MODULE,
     TOOL_TYPE_HEAD,
     TOOL_TYPE_SLOT,
+    VERB_DIALOG_ACTION,
     VERB_PAUSE_PRINT,
     VERB_RESUME_PRINT,
     VERB_SET_BED_TEMPERATURE,
@@ -55,6 +58,7 @@ from .models import (
     CommandResult,
     Device,
     DeviceStates,
+    Dialog,
     Event,
     Feeder,
     Health,
@@ -78,6 +82,8 @@ from .tls import (
 __version__ = "0.0.1-alpha.1"
 
 __all__ = [
+    "ARG_BUTTON",
+    "ARG_DIALOG_ID",
     "ARG_TOOL",
     "CHAMBER_FAN_AUTOMATIC",
     "EVENT_ARRIVED",
@@ -97,6 +103,7 @@ __all__ = [
     "SCOPE_READ",
     "TOOL_TYPE_HEAD",
     "TOOL_TYPE_SLOT",
+    "VERB_DIALOG_ACTION",
     "VERB_PAUSE_PRINT",
     "VERB_RESUME_PRINT",
     "VERB_SET_BED_TEMPERATURE",
@@ -119,6 +126,7 @@ __all__ = [
     "CommandResult",
     "Device",
     "DeviceStates",
+    "Dialog",
     "Event",
     "Feeder",
     "ForbiddenError",

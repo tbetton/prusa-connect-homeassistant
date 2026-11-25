@@ -184,6 +184,36 @@ async def test_materials(make_client: Make, fake: FakeServer, monkeypatch: pytes
         await client.materials_assignments("missing")
 
 
+async def test_dialog_action(make_client: Make, fake: FakeServer) -> None:
+    mk4s = Device.from_dict(load("device_mk4s_mmu.json"))
+    client = make_client()
+    await client.dialog_action(mk4s, "CANCEL", dialog_id="1")
+    assert fake.commands[-1][1] == {
+        "verb": "core.command.dialog_action",
+        "args": {"dialog_id": "1", "button": "Cancel"},
+    }
+    with pytest.raises(UnsupportedError):
+        await client.dialog_action(mk4s, "Retry")
+    with pytest.raises(UnsupportedError):
+        await client.dialog_action(mk4s, "Continue", dialog_id="2")
+    core_one = Device.from_dict(load("device_coreone.json"))
+    assert core_one.dialog is None
+    with pytest.raises(UnsupportedError):
+        await client.dialog_action(core_one, "OK")
+    older = Device.from_dict({**load("device_mk4s_mmu.json"), "capabilities": []})
+    with pytest.raises(UnsupportedError):
+        await client.dialog_action(older, "Continue")
+
+
+async def test_dialog_reads_either_buttons_path() -> None:
+    record = load("device_mk4s_mmu.json")
+    state = dict(record["state"])
+    state["/dialog/button"] = state.pop("/dialog/buttons")
+    dialog = Device.from_dict({**record, "state": state}).dialog
+    assert dialog is not None
+    assert dialog.buttons == ("Continue", "Cancel")
+
+
 async def test_cameras_and_snapshot(make_client: Make, fake: FakeServer) -> None:
     client = make_client()
     cameras = await client.cameras()

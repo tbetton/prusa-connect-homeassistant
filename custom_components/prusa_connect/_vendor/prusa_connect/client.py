@@ -25,10 +25,13 @@ from .exceptions import (
     UnsupportedError,
 )
 from .models import (
+    ARG_BUTTON,
+    ARG_DIALOG_ID,
     ARG_TOOL,
     CHAMBER_FAN_AUTOMATIC,
     EVENT_AUTH_EXPIRED,
     MATERIALS_MODULE,
+    VERB_DIALOG_ACTION,
     VERB_PAUSE_PRINT,
     VERB_RESUME_PRINT,
     VERB_SET_BED_TEMPERATURE,
@@ -378,6 +381,27 @@ class PrusaConnect:
         """Set the chamber light intensity. ``0`` switches it off."""
         name = _value_argument(device, VERB_SET_CHAMBER_LIGHT)
         return await self.command(device.id, VERB_SET_CHAMBER_LIGHT, {name: min(max(round(percent), 0), 100)})
+
+    async def dialog_action(self, device: Device, button: str, dialog_id: str | None = None) -> CommandResult:
+        """Press a button of the dialog the printer shows.
+
+        ``button`` is matched without regard to case against the dialog's
+        buttons and sent as the printer spells it. ``dialog_id`` guards against
+        answering a dialog that has since been replaced.
+        """
+        if not device.supports(VERB_DIALOG_ACTION):
+            raise UnsupportedError(f"{device.id} does not accept {VERB_DIALOG_ACTION}")
+        dialog = device.dialog
+        if dialog is None:
+            raise UnsupportedError(f"{device.id} shows no dialog")
+        if dialog_id is not None and dialog_id != dialog.id:
+            raise UnsupportedError(f"dialog {dialog_id} is no longer shown")
+        match = next((b for b in dialog.buttons if b.casefold() == button.casefold()), None)
+        if match is None:
+            raise UnsupportedError(f"the dialog has no {button!r} button")
+        return await self.command(
+            device.id, VERB_DIALOG_ACTION, {ARG_DIALOG_ID: dialog.id, ARG_BUTTON: match}
+        )
 
     # -- files ---------------------------------------------------------------
 

@@ -31,6 +31,25 @@
         "default": "mdi:stop"
       }
     },
+    "event": {
+      "print": {
+        "default": "mdi:printer-3d",
+        "state_attributes": {
+          "event_type": {
+            "default": "mdi:printer-3d",
+            "state": {
+              "started": "mdi:play-circle",
+              "finished": "mdi:check-circle",
+              "failed": "mdi:alert-circle",
+              "cancelled": "mdi:stop-circle"
+            }
+          }
+        }
+      },
+      "dialog": {
+        "default": "mdi:message-alert"
+      }
+    },
     "fan": {
       "chamber_fan": {
         "default": "mdi:fan",
@@ -130,7 +149,15 @@
       },
       "slot_spool": {
         "default": "mdi:printer-3d-nozzle"
+      },
+      "dialog": {
+        "default": "mdi:message-alert-outline"
       }
+    }
+  },
+  "services": {
+    "press_dialog_button": {
+      "service": "mdi:gesture-tap-button"
     }
   }
 }

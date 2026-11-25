@@ -1,0 +1,11 @@
+press_dialog_button:
+  target:
+    entity:
+      integration: prusa_connect
+      domain: sensor
+  fields:
+    button:
+      required: true
+      example: Continue
+      selector:
+        text:

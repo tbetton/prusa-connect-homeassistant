@@ -151,6 +151,7 @@ history.
 |---|---|
 | Server (hub) | Device only: version and a link to the web app |
 | Printer | State (enum, build volume as attributes), progress, time remaining, start time, finish time, file, thumbnail of the file being printed (image), print time (disabled by default), bed temperature, X/Y/Z position (diagnostic, disabled by default), connected (diagnostic), pause / resume / stop buttons, bed target, print speed and flow numbers |
+| Alerts | *Dialog* sensor: the message the printer waits on (title, with its text and buttons as attributes), answered with the `prusa_connect.press_dialog_button` action; *Dialog* event (`opened`, `closed`); *Print* event (`started`, then `finished`, `failed` or `cancelled`, with the file, print time and filament used) |
 | Chamber (CORE One) | Chamber temperature, chamber target (number), chamber light (dimmable), chamber fan (speed in percent, or *auto* to leave it to the printer), chamber fan 1 and 2 speed (diagnostic) |
 | Head `/tools/<n>` | Nozzle temperature, nozzle target (number, `0` switches the heater off), active, material (heads without a feeder), nozzle diameter, high-flow and hardened nozzle, print and heatbreak fan speed (diagnostic) |
 | Feeder (MMU) on a head | Feeder progress code and current operation (diagnostic) |

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -90,6 +91,8 @@ class PrusaConnectCoordinator(DataUpdateCoordinator[FleetData]):
         self.stream_connected = False
         # Spools, when the server runs the Materials extension.
         self.materials: MaterialsCoordinator | None = None
+        # Entities that turn job events into Home Assistant events.
+        self._job_listeners: list[Callable[[str, Event], None]] = []
         self._throttle = float(entry.options.get(CONF_UPDATE_THROTTLE, DEFAULT_UPDATE_THROTTLE))
         self._push_unsub: CALLBACK_TYPE | None = None
         self._refetch_unsub: CALLBACK_TYPE | None = None
@@ -158,6 +161,17 @@ class PrusaConnectCoordinator(DataUpdateCoordinator[FleetData]):
                 registry.async_update_device(entry.id, remove_config_entry_id=self.config_entry.entry_id)
             elif entry.sw_version != device.firmware or entry.name != device.name:
                 registry.async_update_device(entry.id, sw_version=device.firmware, name=device.name)
+
+    @callback
+    def async_add_job_listener(self, listener: Callable[[str, Event], None]) -> CALLBACK_TYPE:
+        """Call ``listener(device_id, event)`` on every job started and job settled event."""
+        self._job_listeners.append(listener)
+
+        @callback
+        def _remove() -> None:
+            self._job_listeners.remove(listener)
+
+        return _remove
 
     # -- event stream ----------------------------------------------------
 
@@ -233,6 +247,9 @@ class PrusaConnectCoordinator(DataUpdateCoordinator[FleetData]):
             device.connected = False
             self._schedule_push()
         elif event.type in _REFETCH_EVENTS:
+            if event.type in (EVENT_JOB_STARTED, EVENT_JOB_SETTLED) and device is not None:
+                for listener in list(self._job_listeners):
+                    listener(device_id, event)
             self._refetch_ids.add(device_id)
             self._schedule_refetch()
 
