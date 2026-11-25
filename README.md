@@ -1,10 +1,17 @@
-# Prusa Connect (on-premise) for Home Assistant
+# Prusa Connect (on-premise) for Home Assistant — community edition
 
-[![Release](https://img.shields.io/github/v/release/prusa3d/prusa-connect-homeassistant)](https://github.com/prusa3d/prusa-connect-homeassistant/releases)
+> This is an independent, community-maintained version of
+> [prusa3d/prusa-connect-homeassistant](https://github.com/prusa3d/prusa-connect-homeassistant), the
+> Home Assistant integration Prusa Research publishes for its self-hosted Prusa Connect server. It is not
+> made or supported by Prusa Research. It adds the chamber (temperature, target, light, fans), flow, print
+> start time, the thumbnail of the file being printed and the spools of the Materials extension. It keeps
+> the domain `prusa_connect`, so it replaces the original: do not install both.
+
+[![Release](https://img.shields.io/github/v/release/tbetton/prusa-connect-homeassistant)](https://github.com/tbetton/prusa-connect-homeassistant/releases)
 [![HACS: custom repository](https://img.shields.io/badge/HACS-custom_repository-41BDF5)](#marketplace-or-hacs)
 [![Home Assistant 2025.8+](https://img.shields.io/badge/Home_Assistant-2025.8%2B-18BCF2?logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
-[![CI](https://github.com/prusa3d/prusa-connect-homeassistant/actions/workflows/ci.yml/badge.svg)](https://github.com/prusa3d/prusa-connect-homeassistant/actions/workflows/ci.yml)
-[![Validate](https://github.com/prusa3d/prusa-connect-homeassistant/actions/workflows/validate.yml/badge.svg)](https://github.com/prusa3d/prusa-connect-homeassistant/actions/workflows/validate.yml)
+[![CI](https://github.com/tbetton/prusa-connect-homeassistant/actions/workflows/ci.yml/badge.svg)](https://github.com/tbetton/prusa-connect-homeassistant/actions/workflows/ci.yml)
+[![Validate](https://github.com/tbetton/prusa-connect-homeassistant/actions/workflows/validate.yml/badge.svg)](https://github.com/tbetton/prusa-connect-homeassistant/actions/workflows/validate.yml)
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
 **Prusa Connect (on-premise)** is a Home Assistant integration for
@@ -46,13 +53,13 @@ Either way the integration talks only to the server's public HTTP API (`/api/v1`
 > The integration is not in the default catalog of the Marketplace and HACS yet. The registration is in
 > progress. Until then, add this repository as a custom repository, as below.
 
-[![Open your Home Assistant instance and open this repository in the Marketplace or HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=prusa3d&repository=prusa-connect-homeassistant&category=integration)
+[![Open your Home Assistant instance and open this repository in the Marketplace or HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=tbetton&repository=prusa-connect-homeassistant&category=integration)
 
 The button opens this repository in the Marketplace (*Settings → Marketplace*, Home Assistant 2026.11 and
 newer) or in HACS on an older Home Assistant, and offers to add it first. Install
 **Prusa Connect (on-premise)**. The Marketplace loads it without a restart; HACS asks you to restart.
 
-Without the button: HACS → ⋮ → *Custom repositories* → add `https://github.com/prusa3d/prusa-connect-homeassistant`,
+Without the button: HACS → ⋮ → *Custom repositories* → add `https://github.com/tbetton/prusa-connect-homeassistant`,
 category *Integration*.
 
 Both install `prusa_connect.zip` from the GitHub release. Releases marked as pre-release (alpha, beta) are

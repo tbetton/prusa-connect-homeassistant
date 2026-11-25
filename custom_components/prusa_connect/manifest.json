@@ -7,18 +7,20 @@
   "categories": [
     "computers_network.printers"
   ],
-  "codeowners": [],
+  "codeowners": [
+    "@tbetton"
+  ],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/prusa3d/prusa-connect-homeassistant",
+  "documentation": "https://github.com/tbetton/prusa-connect-homeassistant",
   "integration_type": "hub",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/prusa3d/prusa-connect-homeassistant/issues",
+  "issue_tracker": "https://github.com/tbetton/prusa-connect-homeassistant/issues",
   "loggers": [
     "prusa_connect"
   ],
   "requirements": [],
-  "version": "0.1.1",
+  "version": "0.2.0",
   "zeroconf": [
     "_prusa-connect._tcp.local."
   ]

@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [project.urls]
-Source = "https://github.com/prusa3d/prusa-connect-homeassistant/tree/main/lib"
+Source = "https://github.com/tbetton/prusa-connect-homeassistant/tree/main/lib"
 
 [project.optional-dependencies]
 test = ["pytest>=8", "pytest-asyncio>=0.24", "pytest-aiohttp>=1.0", "pytest-cov>=5", "trustme>=1.1"]
