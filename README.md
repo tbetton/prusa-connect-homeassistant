@@ -6,6 +6,11 @@
 > made or supported by Prusa Research. It adds the chamber (temperature, target, light, fans), flow, print
 > start time, the thumbnail of the file being printed and the spools of the Materials extension. It keeps
 > the domain `prusa_connect`, so it replaces the original: do not install both.
+>
+> **Trademarks.** Prusa, Prusa Research, Prusa Connect, CORE One and the Prusa logo are trademarks of
+> Prusa Research a.s. They are used here only to say which software and printers this integration works
+> with. This project is not affiliated with, endorsed by or supported by Prusa Research a.s., and it ships
+> none of its logos. Report problems with this edition here, not to Prusa Research.
 
 [![Release](https://img.shields.io/github/v/release/tbetton/prusa-connect-homeassistant)](https://github.com/tbetton/prusa-connect-homeassistant/releases)
 [![HACS: custom repository](https://img.shields.io/badge/HACS-custom_repository-41BDF5)](#marketplace-or-hacs)
@@ -252,9 +257,8 @@ The test fixtures in `lib/tests/fixtures` were recorded from the Prusa Connect d
 
 ## Brand
 
-The icon ships in `custom_components/prusa_connect/brand/`; Home Assistant 2026.3 and newer show it, an
-older one shows a placeholder. A submission to Home Assistant core moves it to `home-assistant/brands`,
-under one `prusa` brand grouping `prusalink` and `prusa_connect`.
+This edition ships no icon: the Prusa logo belongs to Prusa Research a.s., so Home Assistant shows its
+placeholder instead.
 
 ## Publishing
 
