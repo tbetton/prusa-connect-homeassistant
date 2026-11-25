@@ -9,7 +9,7 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.prusa_connect.const import DOMAIN
+from custom_components.prusa_connect_ce.const import DOMAIN
 
 from .conftest import CORE_ONE, INSTANCE, MK4S_MMU, FakeClient
 from .helpers import event, flush, telemetry

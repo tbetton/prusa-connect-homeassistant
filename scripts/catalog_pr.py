@@ -33,7 +33,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "custom_components" / "prusa_connect" / "manifest.json"
+MANIFEST = ROOT / "custom_components" / "prusa_connect_ce" / "manifest.json"
 CATALOG = "hacs/default"
 CATALOG_BRANCH = "master"
 CATALOG_FILE = "integration"

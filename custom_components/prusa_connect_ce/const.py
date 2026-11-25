@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Final
 
-DOMAIN: Final = "prusa_connect"
+DOMAIN: Final = "prusa_connect_ce"
 
 CONF_FINGERPRINT: Final = "certificate_fingerprint"
 CONF_INSTANCE_ID: Final = "instance_id"

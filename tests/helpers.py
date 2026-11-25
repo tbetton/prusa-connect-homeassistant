@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
-from custom_components.prusa_connect.library import Event
+from custom_components.prusa_connect_ce.library import Event
 
 
 def event(event_type: str, device_id: str | None, data: dict[str, Any], event_id: str | None = None) -> Event:

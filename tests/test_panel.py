@@ -8,12 +8,12 @@ import pytest
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.prusa_connect.const import CONF_PANEL_URL, CONF_SIDEBAR
-from custom_components.prusa_connect.panel import panel_path
+from custom_components.prusa_connect_ce.const import CONF_PANEL_URL, CONF_SIDEBAR
+from custom_components.prusa_connect_ce.panel import panel_path
 
 from .conftest import URL, FakeClient
 
-PANEL = "custom_components.prusa_connect.panel.frontend"
+PANEL = "custom_components.prusa_connect_ce.panel.frontend"
 
 
 @pytest.fixture

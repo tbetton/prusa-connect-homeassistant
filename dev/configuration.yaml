@@ -4,12 +4,12 @@ default_config:
 logger:
   default: info
   logs:
-    custom_components.prusa_connect: debug
+    custom_components.prusa_connect_ce: debug
 
 # The embedded server installs from the development releases of `make up`,
 # signed with the key the releases service made at its first start. `make up`
 # writes its public half here; only this Home Assistant trusts it.
-prusa_connect:
+prusa_connect_ce:
   releases_url: http://localhost:8091/repos/prusa3d/prusa-connect/releases
   trusted_keys:
     - DEV_PUBLIC_KEY

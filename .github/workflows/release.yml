@@ -17,7 +17,7 @@ jobs:
       - name: Tag and manifest versions agree
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          manifest=$(python3 -c "import json;print(json.load(open('custom_components/prusa_connect/manifest.json'))['version'])")
+          manifest=$(python3 -c "import json;print(json.load(open('custom_components/prusa_connect_ce/manifest.json'))['version'])")
           test "$tag" = "$manifest" || { echo "tag $tag != manifest $manifest"; exit 1; }
       - name: Bundled library matches lib/
         run: python3 scripts/vendor_lib.py check
@@ -80,11 +80,11 @@ jobs:
       - name: Build and zip the integration
         run: |
           python3 scripts/vendor_lib.py build --mode "${{ needs.check.outputs.mode }}" --out build
-          cd build/prusa_connect && zip -r ../../prusa_connect.zip .
+          cd build/prusa_connect_ce && zip -r ../../prusa_connect_ce.zip .
       - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
-            prusa_connect.zip
+            prusa_connect_ce.zip
             dist/*

@@ -3,5 +3,5 @@
   "homeassistant": "2025.8.0",
   "render_readme": true,
   "zip_release": true,
-  "filename": "prusa_connect.zip"
+  "filename": "prusa_connect_ce.zip"
 }

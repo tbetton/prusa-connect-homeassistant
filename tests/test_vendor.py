@@ -9,10 +9,10 @@ from pathlib import Path
 
 import pytest
 
-from custom_components.prusa_connect import library
+from custom_components.prusa_connect_ce import library
 
 ROOT = Path(__file__).parent.parent
-PACKAGE = "custom_components.prusa_connect"
+PACKAGE = "custom_components.prusa_connect_ce"
 
 
 def test_uses_the_bundled_copy() -> None:

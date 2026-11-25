@@ -5,7 +5,7 @@
 > Home Assistant integration Prusa Research publishes for its self-hosted Prusa Connect server. It is not
 > made or supported by Prusa Research. It adds the chamber (temperature, target, light, fans), flow, print
 > start time, the thumbnail of the file being printed and the spools of the Materials extension. It keeps
-> the domain `prusa_connect`, so it replaces the original: do not install both.
+> its own domain, `prusa_connect_ce`, so it can be installed next to the original.
 >
 > **Trademarks.** Prusa, Prusa Research, Prusa Connect, CORE One and the Prusa logo are trademarks of
 > Prusa Research a.s. They are used here only to say which software and printers this integration works
@@ -21,7 +21,7 @@
 
 **Prusa Connect (on-premise)** is a Home Assistant integration for
 [Prusa Connect](https://github.com/prusa3d/prusa-connect), the self-hosted server your Prusa printers
-connect to. The name sets it apart from the Prusa Connect cloud service; its domain is `prusa_connect`.
+connect to. The name sets it apart from the Prusa Connect cloud service; its domain is `prusa_connect_ce`.
 It works in one of two ways:
 
 - **Inside Home Assistant.** The integration downloads the Prusa Connect server, checks its signature,
@@ -32,7 +32,7 @@ It works in one of two ways:
 Either way the integration talks only to the server's public HTTP API (`/api/v1`) and its event stream
 (`/api/v1/events`), and puts the Prusa Connect web app in the sidebar, under **Prusa Connect**.
 
-- Domain: `prusa_connect`, IoT class `local_push` (updates arrive over server-sent events)
+- Domain: `prusa_connect_ce`, IoT class `local_push` (updates arrive over server-sent events)
 - One config entry per Prusa Connect server (keyed by its `instance_id`); one device per printer, linked to
   a hub device for the server
 - Found automatically over zeroconf (`_prusa-connect._tcp`), or added by URL
@@ -67,17 +67,25 @@ newer) or in HACS on an older Home Assistant, and offers to add it first. Instal
 Without the button: HACS → ⋮ → *Custom repositories* → add `https://github.com/tbetton/prusa-connect-homeassistant`,
 category *Integration*.
 
-Both install `prusa_connect.zip` from the GitHub release. Releases marked as pre-release (alpha, beta) are
+Both install `prusa_connect_ce.zip` from the GitHub release. Releases marked as pre-release (alpha, beta) are
 offered only when you turn on *Pre-release* for this repository. The integration's releases are full
 releases; the Prusa Connect server it installs is in beta, see [Inside Home Assistant](#inside-home-assistant).
 
 ### Manual
 
-Unzip `prusa_connect.zip` from a GitHub release into `custom_components/prusa_connect` in your
+Unzip `prusa_connect_ce.zip` from a GitHub release into `custom_components/prusa_connect_ce` in your
 Home Assistant configuration (or copy that folder from this repository) and restart.
 
 The integration carries its client library with it, so nothing has to be installed from PyPI. See
 [The client library](#the-client-library).
+
+### Upgrading from 0.2.4 or earlier
+
+Up to 0.2.4 this edition used the domain `prusa_connect`. From 0.2.5 it is `prusa_connect_ce`, so Home
+Assistant sees it as a new integration: remove the old entry, reinstall, then add it again and approve the
+pairing. Entities get new IDs; rename them back if dashboards or automations use the old ones. An embedded
+server keeps its data under `<config>/prusa_connect/`; move that folder to `<config>/prusa_connect_ce/`
+before adding the integration again to keep it.
 
 ## Configuration
 
@@ -98,7 +106,7 @@ runs.
    asks for the setup code Home Assistant shows. Create your administrator there.
 4. **Pair**, as below. The flow then creates the entry.
 
-The server keeps everything under `<config>/prusa_connect/` (the binary, its settings and database, the
+The server keeps everything under `<config>/prusa_connect_ce/` (the binary, its settings and database, the
 uploaded files), so a Home Assistant backup includes it. Home Assistant restarts the server if it stops
 and stops it with Home Assistant. The server's own update page is switched off: updates come through
 the **Prusa Connect Server** update entity. Installing one downloads and checks the new release, copies
@@ -151,7 +159,7 @@ history.
 |---|---|
 | Server (hub) | Device only: version and a link to the web app |
 | Printer | State (enum, build volume as attributes), progress, time remaining, start time, finish time, file, thumbnail of the file being printed (image), print time (disabled by default), bed temperature, X/Y/Z position (diagnostic, disabled by default), connected (diagnostic), pause / resume / stop buttons, bed target, print speed and flow numbers |
-| Alerts | *Dialog* sensor: the message the printer waits on (title, with its text and buttons as attributes), answered with the `prusa_connect.press_dialog_button` action; *Dialog* event (`opened`, `closed`); *Print* event (`started`, then `finished`, `failed` or `cancelled`, with the file, print time and filament used) |
+| Alerts | *Dialog* sensor: the message the printer waits on (title, with its text and buttons as attributes), answered with the `prusa_connect_ce.press_dialog_button` action; *Dialog* event (`opened`, `closed`); *Print* event (`started`, then `finished`, `failed` or `cancelled`, with the file, print time and filament used) |
 | Chamber (CORE One) | Chamber temperature, chamber target (number), chamber light (dimmable), chamber fan (speed in percent, or *auto* to leave it to the printer), chamber fan 1 and 2 speed (diagnostic) |
 | Head `/tools/<n>` | Nozzle temperature, nozzle target (number, `0` switches the heater off), active, material (heads without a feeder), nozzle diameter, high-flow and hardened nozzle, print and heatbreak fan speed (diagnostic) |
 | Feeder (MMU) on a head | Feeder progress code and current operation (diagnostic) |
@@ -215,7 +223,7 @@ provided-by-home-assistant = ["aiohttp"]
 
 | | `bundled` (now) | `pypi` |
 |---|---|---|
-| Library in the release | copy in `custom_components/prusa_connect/_vendor/` | left out |
+| Library in the release | copy in `custom_components/prusa_connect_ce/_vendor/` | left out |
 | `manifest.json` `requirements` | the library's dependencies Home Assistant does not ship (none today) | `prusa-connect==<lib version>` |
 | Import | `library.py` imports the bundled copy | `library.py` falls back to the installed package |
 
@@ -223,7 +231,7 @@ provided-by-home-assistant = ["aiohttp"]
   `scripts/vendor_lib.py sync` and committed (HACS validation and hassfest see it). Never edit it by hand;
   CI runs `scripts/vendor_lib.py check` and fails when it differs from `lib/` or when `manifest.json` does
   not match.
-- The integration imports the library only through `custom_components/prusa_connect/library.py`, and so
+- The integration imports the library only through `custom_components/prusa_connect_ce/library.py`, and so
   do the tests. `lib/` is not installed for the integration tests.
 - The release workflow builds the shipped folder with `scripts/vendor_lib.py build`, which applies the
   mode: in `pypi` mode it removes `_vendor/` and pins the package in `manifest.json`. A release in `pypi`
@@ -258,7 +266,7 @@ The test fixtures in `lib/tests/fixtures` were recorded from the Prusa Connect d
 
 ## Brand
 
-The icon in `custom_components/prusa_connect/brand/` is this edition's own: a generic 3D printer, drawn for
+The icon in `custom_components/prusa_connect_ce/brand/` is this edition's own: a generic 3D printer, drawn for
 it and released under the same MIT licence. It is not the Prusa logo, which belongs to Prusa Research a.s.
 
 ## Publishing

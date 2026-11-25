@@ -16,8 +16,8 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.prusa_connect.config_flow import normalize_host
-from custom_components.prusa_connect.const import (
+from custom_components.prusa_connect_ce.config_flow import normalize_host
+from custom_components.prusa_connect_ce.const import (
     CONF_INSTANCE_ID,
     CONF_MODE,
     CONF_PORT,
@@ -25,14 +25,14 @@ from custom_components.prusa_connect.const import (
     DOMAIN,
     MODE_EMBEDDED,
 )
-from custom_components.prusa_connect.embedded import browser_url, default_host, host_options
-from custom_components.prusa_connect.library import CannotConnectError
-from custom_components.prusa_connect.releases import ReleaseError
-from custom_components.prusa_connect.server import ServerError
+from custom_components.prusa_connect_ce.embedded import browser_url, default_host, host_options
+from custom_components.prusa_connect_ce.library import CannotConnectError
+from custom_components.prusa_connect_ce.releases import ReleaseError
+from custom_components.prusa_connect_ce.server import ServerError
 
 from .conftest import INSTANCE, PAIRING, RELEASE, TOKEN, FakeClient, FakeEmbedded
 
-FLOW = "custom_components.prusa_connect.config_flow"
+FLOW = "custom_components.prusa_connect_ce.config_flow"
 
 
 @pytest.fixture(autouse=True)
@@ -89,7 +89,7 @@ async def test_embedded_flow(hass: HomeAssistant, mock_client: FakeClient, embed
     hass.config.internal_url = "http://192.168.1.5:8123"
     mock_client.first_run.clear()
     mock_client.server_id = "server-1"
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         flow_id = await _install(hass)
         await _wait_for(hass, flow_id, "first_run")
         assert embedded.installs == [RELEASE]
@@ -122,7 +122,7 @@ async def test_embedded_open_mode_needs_no_token(
     hass: HomeAssistant, mock_client: FakeClient, embedded: FakeEmbedded
 ) -> None:
     mock_client.setup_mode = "open"
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         flow_id = await _install(hass)
         await _finish(hass, flow_id)
     assert _entry(hass).data[CONF_TOKEN] == ""
@@ -291,7 +291,9 @@ async def test_update_entity_without_releases(
     embedded.version = "0.0.1-alpha.1"
     entry = _embedded_entry()
     entry.add_to_hass(hass)
-    with patch("custom_components.prusa_connect.update.fetch_releases", side_effect=ReleaseError("offline")):
+    with patch(
+        "custom_components.prusa_connect_ce.update.fetch_releases", side_effect=ReleaseError("offline")
+    ):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
     entity_id = er.async_get(hass).async_get_entity_id("update", DOMAIN, f"{entry.entry_id}:server_update")

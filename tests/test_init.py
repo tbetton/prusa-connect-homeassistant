@@ -9,8 +9,8 @@ from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.typing import WebSocketGenerator
 
-from custom_components.prusa_connect.const import DOMAIN
-from custom_components.prusa_connect.library import AuthenticationError, CannotConnectError, ForbiddenError
+from custom_components.prusa_connect_ce.const import DOMAIN
+from custom_components.prusa_connect_ce.library import AuthenticationError, CannotConnectError, ForbiddenError
 
 from .conftest import CORE_ONE, INSTANCE, FakeClient
 

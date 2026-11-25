@@ -14,7 +14,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.prusa_connect.releases import (
+from custom_components.prusa_connect_ce.releases import (
     Release,
     ReleaseError,
     VerificationError,

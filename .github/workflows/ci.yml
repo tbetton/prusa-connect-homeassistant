@@ -45,8 +45,8 @@ jobs:
         run: |
           python scripts/vendor_lib.py build --mode bundled --out build/bundled
           python scripts/vendor_lib.py build --mode pypi --out build/pypi
-          test -d build/bundled/prusa_connect/_vendor
-          test ! -e build/pypi/prusa_connect/_vendor
+          test -d build/bundled/prusa_connect_ce/_vendor
+          test ! -e build/pypi/prusa_connect_ce/_vendor
 
   integration:
     runs-on: ubuntu-latest

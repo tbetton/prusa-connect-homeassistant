@@ -29,7 +29,7 @@ HA_USER = os.environ.get("HA_USERNAME", "dev")
 HA_PASSWORD = os.environ.get("HA_PASSWORD", "prusa-dev")
 CONNECT_USER = "demo"
 CONNECT_PASSWORD = os.environ.get("CONNECT_PASSWORD", "prusa-demo")
-DOMAIN = "prusa_connect"
+DOMAIN = "prusa_connect_ce"
 CLIENT_ID = f"{HA}/"
 WAIT = 300
 

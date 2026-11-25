@@ -20,7 +20,7 @@ provided-by-home-assistant = ["aiohttp"]
 line-length = 110
 target-version = "py313"
 # Generated from lib/src, which is linted itself.
-extend-exclude = ["custom_components/prusa_connect/_vendor"]
+extend-exclude = ["custom_components/prusa_connect_ce/_vendor"]
 
 [tool.ruff.lint]
 select = [
@@ -41,7 +41,7 @@ ignore = [
 # The dev environment's setup talks to two local servers over plain HTTP.
 "dev/**" = ["INP001", "T201", "S310"]
 # The library's public names, re-exported from the bundled or installed package.
-"custom_components/prusa_connect/library.py" = ["F403"]
+"custom_components/prusa_connect_ce/library.py" = ["F403"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["custom_components", "prusa_connect"]
@@ -62,4 +62,4 @@ pythonpath = ["."]
 [tool.coverage.run]
 source = ["custom_components"]
 # The bundled library is covered by lib/tests.
-omit = ["custom_components/prusa_connect/_vendor/*"]
+omit = ["custom_components/prusa_connect_ce/_vendor/*"]

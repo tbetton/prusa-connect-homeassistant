@@ -24,7 +24,7 @@ import re
 import sys
 from pathlib import Path
 
-MANIFEST = Path(__file__).resolve().parent.parent / "custom_components" / "prusa_connect" / "manifest.json"
+MANIFEST = Path(__file__).resolve().parent.parent / "custom_components" / "prusa_connect_ce" / "manifest.json"
 STAGES = ("alpha", "beta")
 _VERSION = re.compile(r"(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta)\.(\d+))?")
 

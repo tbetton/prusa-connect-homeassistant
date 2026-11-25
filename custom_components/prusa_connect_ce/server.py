@@ -1,6 +1,6 @@
 """The Prusa Connect server run inside Home Assistant.
 
-Everything lives under ``<config>/prusa_connect/``, so a Home Assistant backup
+Everything lives under ``<config>/prusa_connect_ce/``, so a Home Assistant backup
 carries it:
 
 - ``bin/prusa_connect-<version>``: the verified binaries, the installed one and
@@ -47,7 +47,7 @@ from .releases import (
 _LOGGER = logging.getLogger(__name__)
 _SERVER_LOGGER = logging.getLogger(f"{__package__}.server.output")
 
-FOLDER = "prusa_connect"
+FOLDER = "prusa_connect_ce"
 # A server that exits is started again after this long, doubling to the cap.
 RESTART_DELAY = 5.0
 RESTART_DELAY_MAX = 300.0

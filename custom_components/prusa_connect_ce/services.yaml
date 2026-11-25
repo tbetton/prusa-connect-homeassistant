@@ -1,7 +1,7 @@
 press_dialog_button:
   target:
     entity:
-      integration: prusa_connect
+      integration: prusa_connect_ce
       domain: sensor
   fields:
     button:

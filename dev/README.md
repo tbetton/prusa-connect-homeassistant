@@ -55,14 +55,14 @@ browser.
 | | |
 |---|---|
 | `make restart` | bundles `lib/` into the integration and restarts Home Assistant, after any code change |
-| `make logs` | all logs; the integration logs at debug level, the embedded server under `custom_components.prusa_connect.server.output` |
+| `make logs` | all logs; the integration logs at debug level, the embedded server under `custom_components.prusa_connect_ce.server.output` |
 | `make publish VERSION=…` | publishes another development release |
 | `make printers` / `make printers-stop` | connects simulated printers to a server / stops them |
 | `make down` / `make up` | stop and start, keeping the data |
 | `make clean` | removes the containers and all data; the next `make up` starts fresh |
 | `make update-source` | moves `dev/prusa-connect` to the head of its branch; `make up` rebuilds |
 
-The integration is mounted read only from `custom_components/prusa_connect`. `make restart` runs
+The integration is mounted read only from `custom_components/prusa_connect_ce`. `make restart` runs
 `scripts/vendor_lib.py sync` first, so a change in `lib/src` reaches Home Assistant too.
 
 The demo sets its password again on every start, which ends the tokens it handed out. After a

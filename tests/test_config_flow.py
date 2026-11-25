@@ -13,8 +13,8 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.prusa_connect.config_flow import normalize_url
-from custom_components.prusa_connect.const import (
+from custom_components.prusa_connect_ce.config_flow import normalize_url
+from custom_components.prusa_connect_ce.const import (
     CONF_CAMERAS,
     CONF_FINGERPRINT,
     CONF_INSTANCE_ID,
@@ -23,7 +23,7 @@ from custom_components.prusa_connect.const import (
     CONF_UPDATE_THROTTLE,
     DOMAIN,
 )
-from custom_components.prusa_connect.library import (
+from custom_components.prusa_connect_ce.library import (
     ApiError,
     AuthenticationError,
     CannotConnectError,
@@ -37,7 +37,7 @@ from custom_components.prusa_connect.library import (
 from .conftest import PAIRING, TOKEN, URL, FakeClient
 
 FINGERPRINT = ":".join(["AB"] * 32)
-FLOW = "custom_components.prusa_connect.config_flow"
+FLOW = "custom_components.prusa_connect_ce.config_flow"
 
 
 def _zeroconf(
@@ -104,7 +104,7 @@ async def test_user_flow(hass: HomeAssistant, mock_client: FakeClient) -> None:
     result = await _choose(hass, result, "token")
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "token"
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_TOKEN: f" {TOKEN} "})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Workshop"
@@ -155,7 +155,7 @@ async def test_token_errors(hass: HomeAssistant, mock_client: FakeClient, error:
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": key}
     mock_client.devices = AsyncMock(return_value=[])  # type: ignore[method-assign]
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_TOKEN: TOKEN})
     assert result["type"] is FlowResultType.CREATE_ENTRY
 
@@ -178,7 +178,7 @@ async def test_untrusted_certificate_is_pinned(hass: HomeAssistant, mock_client:
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
         result = await _choose(hass, result, "token")
         assert factory.call_args.kwargs["fingerprint"] == FINGERPRINT
-        with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+        with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
             result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_TOKEN: TOKEN})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"][CONF_FINGERPRINT] == FINGERPRINT
@@ -220,7 +220,7 @@ async def test_zeroconf_flow(hass: HomeAssistant, mock_client: FakeClient) -> No
     assert result["description_placeholders"] == {"name": "Workshop", "url": "https://192.168.1.10:8080"}
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
     result = await _choose(hass, result, "token")
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_TOKEN: TOKEN})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"][CONF_URL] == "https://192.168.1.10:8080"
@@ -288,7 +288,7 @@ async def test_pair_flow(hass: HomeAssistant, mock_client: FakeClient) -> None:
     assert mock_client.pairing_requests == [("Home Assistant (Home)", ("operate",))]
     mock_client.approve.set()
     await hass.async_block_till_done()
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(result["flow_id"])
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Workshop"
@@ -474,7 +474,7 @@ async def test_user_flow_keys_the_entry_by_server_id(hass: HomeAssistant, mock_c
     result = await _external(hass)
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_URL: URL})
     result = await _choose(hass, result, "token")
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_TOKEN: TOKEN})
     assert result["result"].unique_id == SERVER_ID
 
@@ -521,7 +521,7 @@ async def test_user_flow_takes_over_a_discovered_one(hass: HomeAssistant, mock_c
     result = await _external(hass)
     result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_URL: URL})
     result = await _choose(hass, result, "token")
-    with patch("custom_components.prusa_connect.async_setup_entry", return_value=True):
+    with patch("custom_components.prusa_connect_ce.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(result["flow_id"], {CONF_TOKEN: TOKEN})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert discovered["flow_id"] not in {f["flow_id"] for f in hass.config_entries.flow.async_progress()}

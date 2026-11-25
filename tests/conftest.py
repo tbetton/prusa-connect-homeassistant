@@ -15,8 +15,8 @@ from homeassistant.const import CONF_TOKEN, CONF_URL
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.prusa_connect.const import CONF_INSTANCE_ID, DOMAIN
-from custom_components.prusa_connect.library import (
+from custom_components.prusa_connect_ce.const import CONF_INSTANCE_ID, DOMAIN
+from custom_components.prusa_connect_ce.library import (
     AppPairing,
     AppSettings,
     Camera,
@@ -33,8 +33,8 @@ from custom_components.prusa_connect.library import (
     StreamItem,
     Thumbnail,
 )
-from custom_components.prusa_connect.releases import Release
-from custom_components.prusa_connect.server import Installed
+from custom_components.prusa_connect_ce.releases import Release
+from custom_components.prusa_connect_ce.server import Installed
 
 FIXTURES = Path(__file__).parent.parent / "lib" / "tests" / "fixtures"
 
@@ -222,8 +222,8 @@ def client() -> FakeClient:
 @pytest.fixture
 def mock_client(client: FakeClient) -> Generator[FakeClient]:
     with (
-        patch("custom_components.prusa_connect.PrusaConnect", return_value=client),
-        patch("custom_components.prusa_connect.config_flow.PrusaConnect", return_value=client),
+        patch("custom_components.prusa_connect_ce.PrusaConnect", return_value=client),
+        patch("custom_components.prusa_connect_ce.config_flow.PrusaConnect", return_value=client),
     ):
         yield client
 
@@ -308,12 +308,12 @@ RELEASE = Release(
 def embedded() -> Generator[FakeEmbedded]:
     server = FakeEmbedded()
     with (
-        patch("custom_components.prusa_connect.embedded_server", return_value=server),
-        patch("custom_components.prusa_connect.config_flow.embedded_server", return_value=server),
-        patch("custom_components.prusa_connect.update.embedded_server", return_value=server),
-        patch("custom_components.prusa_connect.config_flow.fetch_releases", return_value=[RELEASE]),
-        patch("custom_components.prusa_connect.update.fetch_releases", return_value=[RELEASE]),
-        patch("custom_components.prusa_connect.config_flow.machine_asset", return_value=ASSET),
-        patch("custom_components.prusa_connect.update.machine_asset", return_value=ASSET),
+        patch("custom_components.prusa_connect_ce.embedded_server", return_value=server),
+        patch("custom_components.prusa_connect_ce.config_flow.embedded_server", return_value=server),
+        patch("custom_components.prusa_connect_ce.update.embedded_server", return_value=server),
+        patch("custom_components.prusa_connect_ce.config_flow.fetch_releases", return_value=[RELEASE]),
+        patch("custom_components.prusa_connect_ce.update.fetch_releases", return_value=[RELEASE]),
+        patch("custom_components.prusa_connect_ce.config_flow.machine_asset", return_value=ASSET),
+        patch("custom_components.prusa_connect_ce.update.machine_asset", return_value=ASSET),
     ):
         yield server

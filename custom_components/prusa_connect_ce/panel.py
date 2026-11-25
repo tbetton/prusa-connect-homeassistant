@@ -23,7 +23,7 @@ from .embedded import browser_url, default_host
 
 def panel_path(entry: PrusaConnectConfigEntry) -> str:
     """The sidebar path of one server's panel, unique per config entry."""
-    return f"prusa-connect-{entry.entry_id[-6:].lower()}"
+    return f"prusa-connect-ce-{entry.entry_id[-6:].lower()}"
 
 
 def default_panel_url(hass: HomeAssistant, entry: PrusaConnectConfigEntry) -> str:

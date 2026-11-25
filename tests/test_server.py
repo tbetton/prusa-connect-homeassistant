@@ -21,8 +21,8 @@ from aiohttp import web
 from aiohttp.test_utils import TestServer
 from homeassistant.core import HomeAssistant
 
-from custom_components.prusa_connect.releases import Release
-from custom_components.prusa_connect.server import EmbeddedServer, ServerError
+from custom_components.prusa_connect_ce.releases import Release
+from custom_components.prusa_connect_ce.server import EmbeddedServer, ServerError
 
 from .test_releases import PUBLIC, sign
 
@@ -94,7 +94,7 @@ async def embedded(
         server = EmbeddedServer(hass, session, free_port(), (PUBLIC,), root=tmp_path / "prusa_connect")
         server.health_timeout = 15
         server.restart_delay = 0.2
-        with patch("custom_components.prusa_connect.server.machine_asset", return_value=ASSET):
+        with patch("custom_components.prusa_connect_ce.server.machine_asset", return_value=ASSET):
             yield server
         await server.stop()
 

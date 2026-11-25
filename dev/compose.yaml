@@ -75,7 +75,7 @@ services:
       - ./ha-config:/config
       # The integration from this checkout, read only: edit it here and run
       # `make restart`.
-      - ../custom_components/prusa_connect:/config/custom_components/prusa_connect:ro
+      - ../custom_components/prusa_connect_ce:/config/custom_components/prusa_connect_ce:ro
     environment:
       - TZ=${TZ:-Europe/Prague}
     depends_on:

@@ -41,7 +41,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LIB_PYPROJECT = ROOT / "lib" / "pyproject.toml"
 LIB_SOURCE = ROOT / "lib" / "src" / "prusa_connect"
-INTEGRATION = ROOT / "custom_components" / "prusa_connect"
+INTEGRATION = ROOT / "custom_components" / "prusa_connect_ce"
 VENDOR = INTEGRATION / "_vendor"
 VENDORED = VENDOR / "prusa_connect"
 MANIFEST = INTEGRATION / "manifest.json"

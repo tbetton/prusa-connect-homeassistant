@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.prusa_connect.const import DOMAIN
+from custom_components.prusa_connect_ce.const import DOMAIN
 
 from .conftest import CORE_ONE, INSTANCE, XL, FakeClient
 from .helpers import event, flush

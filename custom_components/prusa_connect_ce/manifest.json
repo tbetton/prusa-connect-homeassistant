@@ -1,5 +1,5 @@
 {
-  "domain": "prusa_connect",
+  "domain": "prusa_connect_ce",
   "name": "Prusa Connect (on-premise) CE",
   "after_dependencies": [
     "frontend"
@@ -20,7 +20,7 @@
     "prusa_connect"
   ],
   "requirements": [],
-  "version": "0.2.4",
+  "version": "0.2.5",
   "zeroconf": [
     "_prusa-connect._tcp.local."
   ]
