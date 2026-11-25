@@ -1,6 +1,6 @@
-# Prusa Connect (on-premise) for Home Assistant — community edition
+# Prusa Connect (on-premise) CE for Home Assistant
 
-> This is an independent, community-maintained version of
+> **CE** stands for *community edition*: an independent, community-maintained version of
 > [prusa3d/prusa-connect-homeassistant](https://github.com/prusa3d/prusa-connect-homeassistant), the
 > Home Assistant integration Prusa Research publishes for its self-hosted Prusa Connect server. It is not
 > made or supported by Prusa Research. It adds the chamber (temperature, target, light, fans), flow, print

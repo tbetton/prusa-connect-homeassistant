@@ -3,7 +3,7 @@
     "flow_title": "{name}",
     "step": {
       "user": {
-        "title": "Prusa Connect (on-premise)",
+        "title": "Prusa Connect (on-premise) CE",
         "description": "Kde má server Prusa Connect běžet?",
         "menu_options": {
           "embedded": "V Home Assistantu (nainstalovat a spustit tady)",

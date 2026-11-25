@@ -57,7 +57,7 @@ STREAM_RESTART_DELAY: Final = 60
 
 MANUFACTURER: Final = "Prusa Research"
 # The integration's own name, apart from a Prusa Connect in the cloud.
-INTEGRATION_NAME: Final = "Prusa Connect (on-premise)"
+INTEGRATION_NAME: Final = "Prusa Connect (on-premise) CE"
 # The server's device model: what this integration connects to.
 HUB_MODEL: Final = INTEGRATION_NAME
 # The product: the server's name when it gives none, and the sidebar item.

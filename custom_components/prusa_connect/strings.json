@@ -3,7 +3,7 @@
     "flow_title": "{name}",
     "step": {
       "user": {
-        "title": "Prusa Connect (on-premise)",
+        "title": "Prusa Connect (on-premise) CE",
         "description": "Where should the Prusa Connect server run?",
         "menu_options": {
           "embedded": "Inside Home Assistant (install and run it here)",
