@@ -258,8 +258,8 @@ The test fixtures in `lib/tests/fixtures` were recorded from the Prusa Connect d
 
 ## Brand
 
-This edition ships no icon: the Prusa logo belongs to Prusa Research a.s., so Home Assistant shows its
-placeholder instead.
+The icon in `custom_components/prusa_connect/brand/` is this edition's own: a generic 3D printer, drawn for
+it and released under the same MIT licence. It is not the Prusa logo, which belongs to Prusa Research a.s.
 
 ## Publishing
 
