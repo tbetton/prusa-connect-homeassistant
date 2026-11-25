@@ -28,6 +28,7 @@ from .const import (
 from .coordinator import PrusaConnectConfigEntry, PrusaConnectCoordinator
 from .embedded import DATA_SETTINGS, ReleaseSettings, embedded_server
 from .library import PrusaConnect
+from .materials import MaterialsCoordinator, async_has_materials
 from .panel import async_register_panel
 from .server import ServerError
 
@@ -35,6 +36,9 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
     Platform.CAMERA,
+    Platform.FAN,
+    Platform.IMAGE,
+    Platform.LIGHT,
     Platform.NUMBER,
     Platform.SENSOR,
     Platform.UPDATE,
@@ -95,6 +99,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: PrusaConnectConfigEntry)
     coordinator = PrusaConnectCoordinator(hass, entry, client)
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
+    if await async_has_materials(client):
+        materials = MaterialsCoordinator(hass, entry, client, lambda: list(coordinator.data.devices))
+        await materials.async_refresh()
+        coordinator.materials = materials
 
     dr.async_get(hass).async_get_or_create(
         config_entry_id=entry.entry_id,
@@ -110,6 +118,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: PrusaConnectConfigEntry)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     async_register_panel(hass, entry)
     coordinator.async_start_stream()
+    if coordinator.materials is not None:
+        coordinator.materials.async_start_stream()
     return True
 
 

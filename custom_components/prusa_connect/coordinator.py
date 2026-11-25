@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -42,6 +43,9 @@ from .library import (
     StreamConnected,
     StreamDisconnected,
 )
+
+if TYPE_CHECKING:
+    from .materials import MaterialsCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -84,6 +88,8 @@ class PrusaConnectCoordinator(DataUpdateCoordinator[FleetData]):
         self.server_version: str | None = None
         self.vocabulary = DeviceStates()
         self.stream_connected = False
+        # Spools, when the server runs the Materials extension.
+        self.materials: MaterialsCoordinator | None = None
         self._throttle = float(entry.options.get(CONF_UPDATE_THROTTLE, DEFAULT_UPDATE_THROTTLE))
         self._push_unsub: CALLBACK_TYPE | None = None
         self._refetch_unsub: CALLBACK_TYPE | None = None

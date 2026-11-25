@@ -119,6 +119,68 @@ async def test_bed_and_speed(make_client: Make, fake: FakeServer) -> None:
     assert fake.commands[-1][1]["args"] == {"speed": "150"}
 
 
+async def test_flow_and_chamber(make_client: Make, fake: FakeServer) -> None:
+    core_one = Device.from_dict(load("device_coreone.json"))
+    client = make_client()
+    await client.set_flow(core_one, 95)
+    await client.set_chamber_temperature(core_one, 40.4)
+    await client.set_chamber_fan(core_one, 30)
+    await client.set_chamber_fan(core_one, None)
+    await client.set_chamber_light(core_one, 0)
+    assert [c[1] for c in fake.commands] == [
+        {"verb": "core.command.set_flow", "args": {"flow": "95"}},
+        {"verb": "core.command.set_chamber_target_temp", "args": {"chamber.target_temp": "40"}},
+        {"verb": "core.command.set_chamber_fan_target", "args": {"chamber.fan_pwm_target": "30"}},
+        {"verb": "core.command.set_chamber_fan_target", "args": {"chamber.fan_pwm_target": "-1"}},
+        {"verb": "core.command.set_chamber_led_intensity", "args": {"chamber.led_intensity": "0"}},
+    ]
+    klipper = Device.from_dict(load("device_klipper.json"))
+    with pytest.raises(UnsupportedError):
+        await client.set_chamber_light(klipper, 50)
+
+
+async def test_chamber_readings() -> None:
+    core_one = Device.from_dict(load("device_coreone.json"))
+    assert core_one.chamber_temp == 31.5
+    assert core_one.chamber_target_temp == 40
+    assert core_one.chamber_fan_rpm(1) == 1200
+    assert core_one.chamber_fan_target == -1
+    assert core_one.chamber_led_intensity == 60
+    assert core_one.job_id == 3
+    xl = Device.from_dict(load("device_xl.json"))
+    assert xl.chamber_temp is None
+    assert xl.chamber_led_intensity is None
+
+
+async def test_thumbnail(make_client: Make, fake: FakeServer) -> None:
+    client = make_client()
+    thumbnail = await client.thumbnail(CORE_ONE, "/usb/tangle.bgcode")
+    assert thumbnail is not None
+    assert thumbnail.content == b"\x89PNG"
+    assert thumbnail.content_type == "image/png"
+    assert thumbnail.etag == '"v1"'
+    assert fake.thumbnail_requests[-1]["path"] == "/usb/tangle.bgcode"
+    assert await client.thumbnail(CORE_ONE, "/usb/tangle.bgcode", etag='"v1"') is None
+    assert await client.thumbnail(CORE_ONE, "/usb/plain.gcode") is None
+
+
+async def test_materials(make_client: Make, fake: FakeServer, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("prusa_connect.client.SPOOL_PAGE_SIZE", 2)
+    fake.spools[1]["tool"] = {"device_id": CORE_ONE, "tool_id": "0", "gone": False}
+    fake.spools[2]["tool"] = {"device_id": CORE_ONE, "tool_id": "1", "gone": True}
+    client = make_client()
+    spools = await client.materials_spools()
+    assert [s.id for s in spools] == [0, 1, 2]
+    assert (spools[1].device_id, spools[1].tool_id) == (CORE_ONE, "0")
+    assert spools[2].device_id is None
+    assert spools[0].net_weight_g == 1000
+    assert spools[0].remaining_weight_g == 100
+    tools = await client.materials_assignments(CORE_ONE)
+    assert [(t.tool_id, t.spool_id, t.type) for t in tools] == [("0", 2, "PETG"), ("1", None, None)]
+    with pytest.raises(NotFoundError):
+        await client.materials_assignments("missing")
+
+
 async def test_cameras_and_snapshot(make_client: Make, fake: FakeServer) -> None:
     client = make_client()
     cameras = await client.cameras()

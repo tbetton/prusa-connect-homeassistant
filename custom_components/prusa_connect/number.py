@@ -28,6 +28,8 @@ from .helpers import command
 from .library import (
     ARG_TOOL,
     VERB_SET_BED_TEMPERATURE,
+    VERB_SET_CHAMBER_TARGET_TEMP,
+    VERB_SET_FLOW,
     VERB_SET_NOZZLE_TEMPERATURE,
     VERB_SET_SPEED,
     Device,
@@ -70,6 +72,31 @@ SPEED = PrinterNumberDescription(
     value_fn=lambda d: d.speed,
     set_fn=lambda client, device, value: client.set_speed(device, value),
 )
+FLOW = PrinterNumberDescription(
+    key="flow",
+    translation_key="flow",
+    native_unit_of_measurement=PERCENTAGE,
+    native_min_value=20,
+    native_max_value=999,
+    native_step=1,
+    mode=NumberMode.BOX,
+    verb=VERB_SET_FLOW,
+    value_fn=lambda d: d.flow,
+    set_fn=lambda client, device, value: client.set_flow(device, value),
+)
+CHAMBER_TARGET = PrinterNumberDescription(
+    key="chamber_target_temperature",
+    translation_key="chamber_target_temperature",
+    device_class=NumberDeviceClass.TEMPERATURE,
+    native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+    native_min_value=0,
+    native_max_value=55,
+    native_step=1,
+    mode=NumberMode.BOX,
+    verb=VERB_SET_CHAMBER_TARGET_TEMP,
+    value_fn=lambda d: d.chamber_target_temp,
+    set_fn=lambda client, device, value: client.set_chamber_temperature(device, value),
+)
 NOZZLE_TARGET = NumberEntityDescription(
     key="nozzle_target_temperature",
     translation_key="nozzle_target_temperature",
@@ -93,7 +120,7 @@ def _addressable(device: Device, head: Tool) -> bool:
 def _entities(coordinator: PrusaConnectCoordinator, device: Device) -> Iterator[Entity]:
     if not device.may("operate"):
         return
-    for description in (BED_TARGET, SPEED):
+    for description in (BED_TARGET, SPEED, FLOW, CHAMBER_TARGET):
         if device.supports(description.verb) and description.value_fn(device) is not None:
             yield PrinterNumber(coordinator, device, description)
     if device.supports(VERB_SET_NOZZLE_TEMPERATURE):

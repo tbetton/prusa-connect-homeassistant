@@ -31,9 +31,40 @@
         "default": "mdi:stop"
       }
     },
+    "fan": {
+      "chamber_fan": {
+        "default": "mdi:fan",
+        "state": {
+          "off": "mdi:fan-off"
+        },
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "auto": "mdi:fan-auto"
+            }
+          }
+        }
+      }
+    },
+    "image": {
+      "thumbnail": {
+        "default": "mdi:image"
+      }
+    },
+    "light": {
+      "chamber_light": {
+        "default": "mdi:led-strip-variant",
+        "state": {
+          "off": "mdi:led-strip-variant-off"
+        }
+      }
+    },
     "number": {
       "speed": {
         "default": "mdi:speedometer"
+      },
+      "flow": {
+        "default": "mdi:water-percent"
       }
     },
     "sensor": {
@@ -84,6 +115,21 @@
       },
       "axis_z": {
         "default": "mdi:axis-z-arrow"
+      },
+      "start_time": {
+        "default": "mdi:clock-start"
+      },
+      "chamber_fan_1_speed": {
+        "default": "mdi:fan"
+      },
+      "chamber_fan_2_speed": {
+        "default": "mdi:fan"
+      },
+      "spool": {
+        "default": "mdi:printer-3d-nozzle"
+      },
+      "slot_spool": {
+        "default": "mdi:printer-3d-nozzle"
       }
     }
   }

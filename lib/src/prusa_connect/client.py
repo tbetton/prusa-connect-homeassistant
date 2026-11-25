@@ -26,10 +26,16 @@ from .exceptions import (
 )
 from .models import (
     ARG_TOOL,
+    CHAMBER_FAN_AUTO,
     EVENT_AUTH_EXPIRED,
+    MATERIALS_MODULE,
     VERB_PAUSE_PRINT,
     VERB_RESUME_PRINT,
     VERB_SET_BED_TEMPERATURE,
+    VERB_SET_CHAMBER_FAN_TARGET,
+    VERB_SET_CHAMBER_LED_INTENSITY,
+    VERB_SET_CHAMBER_TARGET_TEMP,
+    VERB_SET_FLOW,
     VERB_SET_NOZZLE_TEMPERATURE,
     VERB_SET_SPEED,
     VERB_STOP_PRINT,
@@ -41,9 +47,12 @@ from .models import (
     DeviceStates,
     Event,
     Health,
+    MaterialAssignment,
     SetupStatus,
     Snapshot,
+    Spool,
     StreamConnected,
+    Thumbnail,
     parse_tool_id,
 )
 from .sse import SSEParser
@@ -71,6 +80,7 @@ _PAIRING_GONE = ("core.auth/APP_PAIRING_EXPIRED", "core.auth/APP_PAIRING_UNKNOWN
 # RFC 8628: a slow_down answer adds five seconds to the interval for good.
 _SLOW_DOWN_STEP = 5
 DEVICE_PAGE_SIZE = 100
+SPOOL_PAGE_SIZE = 100
 
 
 @dataclass(frozen=True, slots=True)
@@ -348,6 +358,83 @@ class PrusaConnect:
     async def set_speed(self, device: Device, percent: float) -> CommandResult:
         name = _value_argument(device, VERB_SET_SPEED)
         return await self.command(device.id, VERB_SET_SPEED, {name: round(percent)})
+
+    async def set_flow(self, device: Device, percent: float) -> CommandResult:
+        name = _value_argument(device, VERB_SET_FLOW)
+        return await self.command(device.id, VERB_SET_FLOW, {name: round(percent)})
+
+    async def set_chamber_temperature(self, device: Device, celsius: float) -> CommandResult:
+        """Set the chamber target."""
+        name = _value_argument(device, VERB_SET_CHAMBER_TARGET_TEMP)
+        return await self.command(device.id, VERB_SET_CHAMBER_TARGET_TEMP, {name: round(celsius)})
+
+    async def set_chamber_fan(self, device: Device, percent: float | None) -> CommandResult:
+        """Set the chamber fan target. ``None`` hands the fans back to the printer."""
+        name = _value_argument(device, VERB_SET_CHAMBER_FAN_TARGET)
+        value = CHAMBER_FAN_AUTO if percent is None else round(percent)
+        return await self.command(device.id, VERB_SET_CHAMBER_FAN_TARGET, {name: value})
+
+    async def set_chamber_light(self, device: Device, percent: float) -> CommandResult:
+        """Set the chamber light intensity. ``0`` switches it off."""
+        name = _value_argument(device, VERB_SET_CHAMBER_LED_INTENSITY)
+        return await self.command(device.id, VERB_SET_CHAMBER_LED_INTENSITY, {name: round(percent)})
+
+    # -- files ---------------------------------------------------------------
+
+    async def thumbnail(self, device_id: str, path: str, etag: str | None = None) -> Thumbnail | None:
+        """The picture inside a print file on a printer's storage.
+
+        ``None`` is a file that carries no picture, or, with ``etag``, a
+        picture that has not changed. Reading it takes *operate*.
+        """
+        headers = {"Accept": "image/png, image/jpeg"}
+        if etag:
+            headers["If-None-Match"] = etag
+        try:
+            response = await self._send(
+                "GET", f"{API}/devices/{device_id}/files/thumbnail", params={"path": path}, headers=headers
+            )
+        except NotFoundError:
+            return None
+        try:
+            if response.status in (204, 304):
+                return None
+            content = await response.read()
+        except (aiohttp.ClientError, TimeoutError) as err:
+            raise CannotConnectError(f"reading the thumbnail of {path} failed: {err!r}") from err
+        finally:
+            response.release()
+        return Thumbnail(
+            content=content,
+            content_type=response.headers.get("Content-Type", "image/png"),
+            etag=response.headers.get("ETag"),
+        )
+
+    # -- Materials extension -------------------------------------------------
+
+    async def materials_spools(self) -> list[Spool]:
+        """Every spool the Materials extension keeps, walking every page.
+
+        A server without the extension answers :class:`NotFoundError`.
+        """
+        spools: list[Spool] = []
+        offset = 0
+        while True:
+            page = await self._json(
+                "GET",
+                f"{API}/modules/{MATERIALS_MODULE}/spools",
+                params={"limit": str(SPOOL_PAGE_SIZE), "offset": str(offset)},
+            )
+            items = page.get("spools") or []
+            spools.extend(Spool.from_dict(item) for item in items)
+            offset += len(items)
+            if not items or offset >= int(page.get("total", 0)):
+                return spools
+
+    async def materials_assignments(self, device_id: str) -> list[MaterialAssignment]:
+        """The material each tool of a printer is set to in the Materials extension."""
+        data = await self._json("GET", f"{API}/modules/{MATERIALS_MODULE}/printers/{device_id}/tools")
+        return [MaterialAssignment.from_dict(item) for item in data.get("tools") or []]
 
     # -- cameras -----------------------------------------------------------
 

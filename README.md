@@ -105,7 +105,7 @@ start, the previous one and its data come back.
 3. **Pair.** Choose *Pair with a code*. Home Assistant shows a code and a link to `/pair` on your server.
    Open it, sign in to Prusa Connect, check the code and approve *Home Assistant*. The flow continues on
    its own and keeps the token the server hands out. Home Assistant asks for the *operate* scope: reading,
-   plus the buttons and the temperature and speed numbers. You may approve only *read*; the sensors then
+   plus the buttons, the temperature, speed and flow numbers, and the chamber light and fan. You may approve only *read*; the sensors then
    work and the commands are refused. The code is valid for ten minutes.
 
    *Paste an API token* is the other way: create a credential in Prusa Connect under
@@ -138,7 +138,8 @@ history.
 | Device | Entities |
 |---|---|
 | Server (hub) | Device only: version and a link to the web app |
-| Printer | State (enum, build volume as attributes), progress, time remaining, finish time, file, print time (disabled by default), bed temperature, X/Y/Z position (diagnostic, disabled by default), connected (diagnostic), pause / resume / stop buttons, bed target and print speed numbers |
+| Printer | State (enum, build volume as attributes), progress, time remaining, start time, finish time, file, thumbnail of the file being printed (image), print time (disabled by default), bed temperature, X/Y/Z position (diagnostic, disabled by default), connected (diagnostic), pause / resume / stop buttons, bed target, print speed and flow numbers |
+| Chamber (CORE One) | Chamber temperature, chamber target (number), chamber light (dimmable), chamber fan (speed in percent, or *auto* to leave it to the printer), chamber fan 1 and 2 speed (diagnostic) |
 | Head `/tools/<n>` | Nozzle temperature, nozzle target (number, `0` switches the heater off), active, material (heads without a feeder), nozzle diameter, high-flow and hardened nozzle, print and heatbreak fan speed (diagnostic) |
 | Feeder (MMU) on a head | Feeder progress code and current operation (diagnostic) |
 | Feeder slot `/tools/<n>.<k>` | Material, active |
@@ -148,7 +149,7 @@ Entities are created from what each printer reports, so an MK4S with an MMU gets
 one set per head, and a head switched off on the printer is left out (or becomes unavailable when it is
 switched off later). Printers and heads that appear later get their entities without a restart; a printer
 removed from Prusa Connect is removed from Home Assistant. Buttons and numbers are only created for
-printers the token may *operate*, and only for verbs the printer accepts. Buttons are available only in
+printers the token may *operate*, and only for verbs the printer accepts; the same goes for the chamber light and fan, and for the thumbnail, which the server only serves to a caller that may operate the printer. Buttons are available only in
 states where they make sense (pause while printing, resume while paused).
 
 Printers of other vendors connected through a Prusa Connect driver get the same entities for whatever

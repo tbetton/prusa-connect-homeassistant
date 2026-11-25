@@ -174,6 +174,28 @@
         "name": "Kamera {camera}"
       }
     },
+    "fan": {
+      "chamber_fan": {
+        "name": "Ventilátor komory",
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "auto": "Automaticky"
+            }
+          }
+        }
+      }
+    },
+    "image": {
+      "thumbnail": {
+        "name": "Náhled"
+      }
+    },
+    "light": {
+      "chamber_light": {
+        "name": "Osvětlení komory"
+      }
+    },
     "number": {
       "bed_target_temperature": {
         "name": "Cílová teplota podložky"
@@ -183,6 +205,12 @@
       },
       "speed": {
         "name": "Rychlost tisku"
+      },
+      "flow": {
+        "name": "Průtok"
+      },
+      "chamber_target_temperature": {
+        "name": "Cílová teplota komory"
       }
     },
     "sensor": {
@@ -261,6 +289,65 @@
       },
       "feeder_command": {
         "name": "Nástroj {tool} operace podavače"
+      },
+      "start_time": {
+        "name": "Čas zahájení"
+      },
+      "chamber_temperature": {
+        "name": "Teplota komory"
+      },
+      "chamber_fan_1_speed": {
+        "name": "Otáčky ventilátoru komory 1"
+      },
+      "chamber_fan_2_speed": {
+        "name": "Otáčky ventilátoru komory 2"
+      },
+      "spool": {
+        "name": "Nástroj {tool} cívka",
+        "state_attributes": {
+          "spool_id": {
+            "name": "Cívka"
+          },
+          "brand": {
+            "name": "Výrobce"
+          },
+          "name": {
+            "name": "Název materiálu"
+          },
+          "type": {
+            "name": "Typ materiálu"
+          },
+          "color_hex": {
+            "name": "Barva"
+          },
+          "color_rgba": {
+            "name": "Barva (RGBA)"
+          },
+          "initial_weight": {
+            "name": "Čistá hmotnost"
+          },
+          "percent": {
+            "name": "Zbývá"
+          },
+          "full_weight": {
+            "name": "Hmotnost plné cívky"
+          },
+          "empty_weight": {
+            "name": "Hmotnost prázdné cívky"
+          },
+          "location": {
+            "name": "Umístění"
+          },
+          "notes": {
+            "name": "Poznámky"
+          },
+          "material_uuid": {
+            "name": "UUID materiálu"
+          }
+        }
+      },
+      "slot_spool": {
+        "name": "Nástroj {tool} slot {slot} cívka"
       }
     },
     "update": {

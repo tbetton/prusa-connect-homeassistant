@@ -27,6 +27,13 @@ VERB_STOP_PRINT = "core.command.stop_print"
 VERB_SET_NOZZLE_TEMPERATURE = "core.command.set_nozzle_temperature"
 VERB_SET_BED_TEMPERATURE = "core.command.set_bed_temperature"
 VERB_SET_SPEED = "core.command.set_speed"
+VERB_SET_FLOW = "core.command.set_flow"
+VERB_SET_CHAMBER_TARGET_TEMP = "core.command.set_chamber_target_temp"
+VERB_SET_CHAMBER_FAN_TARGET = "core.command.set_chamber_fan_target"
+VERB_SET_CHAMBER_LED_INTENSITY = "core.command.set_chamber_led_intensity"
+
+# The chamber fan target that hands the fans back to the printer's own control.
+CHAMBER_FAN_AUTO = -1
 
 # The argument that names the head a per-tool verb addresses. Its value is the
 # 0-based head index, the same number as the head's tool id.
@@ -42,6 +49,12 @@ EVENT_JOB_STARTED = "com.prusa.connect.device.job.started"
 EVENT_JOB_SETTLED = "com.prusa.connect.device.job.settled"
 EVENT_CONTINUITY_LOST = "com.prusa.connect.stream.continuity.lost"
 EVENT_AUTH_EXPIRED = "prusa-connect.auth.expired"
+
+# The Materials extension (spools and what each tool is loaded with), when the
+# server has it installed.
+MATERIALS_MODULE = "com.github.aux.prusa3d.materials"
+EVENT_MATERIALS_SPOOL = f"{MATERIALS_MODULE}.spool"
+EVENT_MATERIALS_TOOL = f"{MATERIALS_MODULE}.tool"
 
 TOOL_TYPE_HEAD = "FFF_PRINT_HEAD"
 TOOL_TYPE_SLOT = "FFF_FEEDER_SLOT"
@@ -490,6 +503,32 @@ class Device:
         """The flow factor, in percent."""
         return _float(self.state.get("/flow"))
 
+    @property
+    def chamber_temp(self) -> float | None:
+        return _float(self.state.get("/temperature/chamber"))
+
+    @property
+    def chamber_target_temp(self) -> float | None:
+        return _float(self.state.get("/temperature/chamber_target"))
+
+    def chamber_fan_rpm(self, fan: int) -> int | None:
+        """The speed of one chamber fan (``1`` or ``2``), in revolutions per minute."""
+        return _int(self.state.get(f"/chamber/fan_{fan}_rpm"))
+
+    @property
+    def chamber_fan_target(self) -> int | None:
+        """The chamber fan target in percent, or :data:`CHAMBER_FAN_AUTO`."""
+        return _int(self.state.get("/chamber/fan_pwm_target"))
+
+    @property
+    def chamber_led_intensity(self) -> int | None:
+        """The chamber light intensity, in percent. ``0`` is a light that is off."""
+        return _int(self.state.get("/chamber/led_intensity"))
+
+    @property
+    def job_id(self) -> int | None:
+        return _int(self.state.get("/job/id"))
+
     def axis(self, name: str) -> float | None:
         """The position of one axis (``x``, ``y`` or ``z``), in millimetres."""
         return _float(self.state.get(f"/axis/{name}"))
@@ -572,6 +611,91 @@ class Snapshot:
     content: bytes
     content_type: str
     last_modified: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Spool:
+    """A spool the Materials extension keeps, with what is left on it."""
+
+    id: int
+    brand: str | None
+    material_name: str | None
+    type: str | None
+    color_rgba: str | None
+    material_uuid: str | None
+    full_weight_g: float | None
+    empty_weight_g: float | None
+    remaining_weight_g: float | None
+    location: str | None
+    notes: str | None
+    archived: bool
+    # The tool it is loaded in: the device and the tool's 0-based id.
+    device_id: str | None = None
+    tool_id: str | None = None
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> Spool:
+        raw_tool = data.get("tool")
+        tool: Mapping[str, Any] = raw_tool if isinstance(raw_tool, Mapping) else {}
+        loaded = bool(tool) and not tool.get("gone")
+        return cls(
+            id=int(data["id"]),
+            brand=_str(data.get("brand_name")) or None,
+            material_name=_str(data.get("material_name")) or None,
+            type=_str(data.get("type")) or None,
+            color_rgba=_str(data.get("color_rgba")) or None,
+            material_uuid=_str(data.get("material_uuid")) or None,
+            full_weight_g=_float(data.get("full_weight_g")),
+            empty_weight_g=_float(data.get("empty_weight_g")),
+            remaining_weight_g=_float(data.get("remaining_weight_g")),
+            location=_str(data.get("location")) or None,
+            notes=_str(data.get("notes")) or None,
+            archived=data.get("archived_at") is not None,
+            device_id=_str(tool.get("device_id")) if loaded else None,
+            tool_id=_str(tool.get("tool_id")) if loaded else None,
+        )
+
+    @property
+    def net_weight_g(self) -> float | None:
+        """The filament a full spool holds: full weight less the empty spool."""
+        full, empty = self.full_weight_g, self.empty_weight_g or 0
+        return full - empty if full and full > empty else None
+
+
+@dataclass(frozen=True, slots=True)
+class MaterialAssignment:
+    """The material a tool is set to in the Materials extension."""
+
+    tool_id: str
+    spool_id: int | None
+    brand: str | None
+    material_name: str | None
+    type: str | None
+    color_rgba: str | None
+    material_uuid: str | None
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> MaterialAssignment:
+        assignment = data.get("assignment")
+        a: Mapping[str, Any] = assignment if isinstance(assignment, Mapping) else {}
+        return cls(
+            tool_id=str(data["id"]),
+            spool_id=_int(a.get("spool_id")),
+            brand=_str(a.get("brand_name")) or None,
+            material_name=_str(a.get("material_name")) or None,
+            type=_str(a.get("type")) or _str(a.get("abbreviation")) or None,
+            color_rgba=_str(a.get("color_rgba")) or None,
+            material_uuid=_str(a.get("material_uuid")) or None,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class Thumbnail:
+    """The picture inside a print file."""
+
+    content: bytes
+    content_type: str
+    etag: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

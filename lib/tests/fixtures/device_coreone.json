@@ -140,7 +140,13 @@
     "/tools/0/material_package_instance/package/material/abbreviation": "PLA",
     "/tools/0/nozzle_target_temp": 215,
     "/tools/0/nozzle_temp": 215,
-    "/tools/0/type": "FFF_PRINT_HEAD"
+    "/tools/0/type": "FFF_PRINT_HEAD",
+    "/temperature/chamber": 31.5,
+    "/temperature/chamber_target": 40,
+    "/chamber/fan_1_rpm": 1200,
+    "/chamber/fan_2_rpm": 1180,
+    "/chamber/fan_pwm_target": -1,
+    "/chamber/led_intensity": 60
   },
   "job": {
     "id": "01a16eae-995c-70fd-b99b-9942a030d15d",

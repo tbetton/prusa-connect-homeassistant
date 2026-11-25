@@ -32,6 +32,17 @@ class FakeServer:
         self.event_bodies: list[str | int] = []
         self.event_requests: list[dict[str, str]] = []
         self.snapshot_status = 200
+        self.thumbnail_requests: list[dict[str, str]] = []
+        self.spools: list[dict[str, Any]] = [
+            {
+                "id": i,
+                "remaining_weight_g": 100 + i,
+                "full_weight_g": 1200,
+                "empty_weight_g": 200,
+                "tool": None,
+            }
+            for i in range(3)
+        ]
         self.pairing_requests: list[dict[str, Any]] = []
         self.pairing_polls: list[dict[str, Any]] = []
         # What each poll answers, in order: a problem code, or a token.
@@ -47,6 +58,10 @@ class FakeServer:
         app.router.add_post("/api/v1/devices/{id}/commands", self.command)
         app.router.add_get("/api/v1/cameras", self.cameras)
         app.router.add_get("/api/v1/cameras/{name}/snapshot", self.snapshot)
+        app.router.add_get("/api/v1/devices/{id}/files/thumbnail", self.thumbnail)
+        materials = "/api/v1/modules/com.github.aux.prusa3d.materials"
+        app.router.add_get(f"{materials}/spools", self.materials_spools)
+        app.router.add_get(f"{materials}/printers/{{id}}/tools", self.materials_tools)
         app.router.add_get("/api/v1/vocabularies/device-states", self.states)
         app.router.add_get("/api/v1/events", self.events)
         app.router.add_post("/api/v1/auth/app-pairings", self.request_pairing)
@@ -134,6 +149,28 @@ class FakeServer:
             content_type="image/jpeg",
             headers={"Last-Modified": "Sat, 24 Oct 2026 16:16:38 GMT"},
         )
+
+    async def materials_spools(self, request: web.Request) -> web.Response:
+        offset, limit = int(request.query["offset"]), int(request.query["limit"])
+        page = self.spools[offset : offset + limit]
+        return web.json_response({"spools": page, "total": len(self.spools)})
+
+    async def materials_tools(self, request: web.Request) -> web.Response:
+        if request.match_info["id"] == "missing":
+            return self._problem(404, "materials/NOT_FOUND")
+        tools = [
+            {"id": "0", "assignment": {"spool_id": 2, "brand_name": "Prusament", "type": "PETG"}},
+            {"id": "1", "assignment": None},
+        ]
+        return web.json_response({"id": request.match_info["id"], "tools": tools})
+
+    async def thumbnail(self, request: web.Request) -> web.Response:
+        self.thumbnail_requests.append({"path": request.query["path"], **request.headers})
+        if request.query["path"].endswith(".gcode"):
+            return self._problem(404, "core.storage/NO_THUMBNAIL")
+        if request.headers.get("If-None-Match") == '"v1"':
+            return web.Response(status=304)
+        return web.Response(body=b"\x89PNG", content_type="image/png", headers={"ETag": '"v1"'})
 
     async def events(self, request: web.Request) -> web.StreamResponse:
         self.event_requests.append(dict(request.headers))

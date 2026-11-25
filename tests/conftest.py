@@ -24,10 +24,14 @@ from custom_components.prusa_connect.library import (
     Device,
     DeviceStates,
     Health,
+    MaterialAssignment,
+    NotFoundError,
     PrusaConnect,
     SetupStatus,
     Snapshot,
+    Spool,
     StreamItem,
+    Thumbnail,
 )
 from custom_components.prusa_connect.releases import Release
 from custom_components.prusa_connect.server import Installed
@@ -84,11 +88,17 @@ class FakeClient(PrusaConnect):
             self.records[record["id"]] = record
         self.cameras_data = load("cameras.json")["items"]
         self.commands: list[tuple[str, str, dict[str, Any]]] = []
+        self.thumbnail_requests: list[tuple[str, str]] = []
+        # The Materials extension: absent unless a test sets these.
+        self.spools: list[dict[str, Any]] | None = None
+        self.material_tools: dict[str, list[dict[str, Any]]] = {}
         self.command_error: Exception | None = None
         self.error: Exception | None = None
         self.devices_calls = 0
         self.device_calls: list[str] = []
         self.queue: asyncio.Queue[StreamItem | Exception] = asyncio.Queue()
+        # What a stream that asks for some event types only reads.
+        self.typed_queue: asyncio.Queue[StreamItem | Exception] = asyncio.Queue()
         self.url = URL
         # Pairing: what was asked, and what the wait ends with once ``approve`` is set.
         self.pairing_requests: list[tuple[str, tuple[str, ...]]] = []
@@ -164,6 +174,24 @@ class FakeClient(PrusaConnect):
             raise self.error
         return Snapshot((FIXTURES / "snapshot.jpg").read_bytes(), "image/jpeg", "Sat, 24 Oct 2026")
 
+    async def materials_spools(self) -> list[Spool]:
+        if self.spools is None:
+            raise NotFoundError(404, code="core.validation/ROUTE_NOT_FOUND")
+        if self.error:
+            raise self.error
+        return [Spool.from_dict(s) for s in self.spools]
+
+    async def materials_assignments(self, device_id: str) -> list[MaterialAssignment]:
+        if self.spools is None or device_id not in self.material_tools:
+            raise NotFoundError(404, code="materials/NOT_FOUND")
+        return [MaterialAssignment.from_dict(t) for t in self.material_tools[device_id]]
+
+    async def thumbnail(self, device_id: str, path: str, etag: str | None = None) -> Thumbnail | None:
+        self.thumbnail_requests.append((device_id, path))
+        if self.error:
+            raise self.error
+        return Thumbnail(b"png:" + path.encode(), "image/png", '"v1"')
+
     async def command(
         self,
         device_id: str,
@@ -178,8 +206,9 @@ class FakeClient(PrusaConnect):
         return CommandResult(ok=True, command_id="cmd")
 
     async def events(self, **kwargs: Any) -> AsyncIterator[StreamItem]:  # type: ignore[override]
+        queue = self.typed_queue if kwargs.get("types") else self.queue
         while True:
-            item = await self.queue.get()
+            item = await queue.get()
             if isinstance(item, Exception):
                 raise item
             yield item
