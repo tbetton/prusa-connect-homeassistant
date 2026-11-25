@@ -145,11 +145,14 @@ async def test_chamber_readings() -> None:
     assert core_one.chamber_target_temp == 40
     assert core_one.chamber_fan_rpm(1) == 1200
     assert core_one.chamber_fan_target == -1
-    assert core_one.chamber_led_intensity == 60
+    assert core_one.chamber_light == 60
     assert core_one.job_id == 3
+    assert core_one.chamber_max_temp == 55
+    core_one_l = Device.from_dict({**load("device_coreone.json"), "model": "CORE One L"})
+    assert core_one_l.chamber_max_temp == 60
     xl = Device.from_dict(load("device_xl.json"))
     assert xl.chamber_temp is None
-    assert xl.chamber_led_intensity is None
+    assert xl.chamber_light is None
 
 
 async def test_thumbnail(make_client: Make, fake: FakeServer) -> None:

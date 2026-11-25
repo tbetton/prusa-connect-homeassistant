@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from .coordinator import PrusaConnectConfigEntry, PrusaConnectCoordinator
 from .entity import PrusaConnectEntity, async_add_entities_as_found
 from .helpers import command
-from .library import CHAMBER_FAN_AUTO, VERB_SET_CHAMBER_FAN_TARGET, Device
+from .library import CHAMBER_FAN_AUTOMATIC, VERB_SET_CHAMBER_FAN, Device
 
 PARALLEL_UPDATES = 1
 
@@ -21,11 +21,7 @@ PRESET_AUTO = "auto"
 
 
 def _entities(coordinator: PrusaConnectCoordinator, device: Device) -> Iterator[Entity]:
-    if (
-        device.may("operate")
-        and device.supports(VERB_SET_CHAMBER_FAN_TARGET)
-        and device.chamber_fan_target is not None
-    ):
+    if device.may("operate") and device.supports(VERB_SET_CHAMBER_FAN):
         yield ChamberFan(coordinator, device)
 
 
@@ -71,7 +67,7 @@ class ChamberFan(PrusaConnectEntity, FanEntity):
 
     @property
     def preset_mode(self) -> str | None:
-        return PRESET_AUTO if self._target == CHAMBER_FAN_AUTO else None
+        return PRESET_AUTO if self._target == CHAMBER_FAN_AUTOMATIC else None
 
     async def _set(self, percent: float | None) -> None:
         device = self.device

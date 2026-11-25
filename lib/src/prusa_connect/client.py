@@ -26,15 +26,15 @@ from .exceptions import (
 )
 from .models import (
     ARG_TOOL,
-    CHAMBER_FAN_AUTO,
+    CHAMBER_FAN_AUTOMATIC,
     EVENT_AUTH_EXPIRED,
     MATERIALS_MODULE,
     VERB_PAUSE_PRINT,
     VERB_RESUME_PRINT,
     VERB_SET_BED_TEMPERATURE,
-    VERB_SET_CHAMBER_FAN_TARGET,
-    VERB_SET_CHAMBER_LED_INTENSITY,
-    VERB_SET_CHAMBER_TARGET_TEMP,
+    VERB_SET_CHAMBER_FAN,
+    VERB_SET_CHAMBER_LIGHT,
+    VERB_SET_CHAMBER_TEMPERATURE,
     VERB_SET_FLOW,
     VERB_SET_NOZZLE_TEMPERATURE,
     VERB_SET_SPEED,
@@ -365,19 +365,19 @@ class PrusaConnect:
 
     async def set_chamber_temperature(self, device: Device, celsius: float) -> CommandResult:
         """Set the chamber target."""
-        name = _value_argument(device, VERB_SET_CHAMBER_TARGET_TEMP)
-        return await self.command(device.id, VERB_SET_CHAMBER_TARGET_TEMP, {name: round(celsius)})
+        name = _value_argument(device, VERB_SET_CHAMBER_TEMPERATURE)
+        return await self.command(device.id, VERB_SET_CHAMBER_TEMPERATURE, {name: round(celsius)})
 
     async def set_chamber_fan(self, device: Device, percent: float | None) -> CommandResult:
         """Set the chamber fan target. ``None`` hands the fans back to the printer."""
-        name = _value_argument(device, VERB_SET_CHAMBER_FAN_TARGET)
-        value = CHAMBER_FAN_AUTO if percent is None else round(percent)
-        return await self.command(device.id, VERB_SET_CHAMBER_FAN_TARGET, {name: value})
+        name = _value_argument(device, VERB_SET_CHAMBER_FAN)
+        value = CHAMBER_FAN_AUTOMATIC if percent is None else min(max(round(percent), 0), 100)
+        return await self.command(device.id, VERB_SET_CHAMBER_FAN, {name: value})
 
     async def set_chamber_light(self, device: Device, percent: float) -> CommandResult:
         """Set the chamber light intensity. ``0`` switches it off."""
-        name = _value_argument(device, VERB_SET_CHAMBER_LED_INTENSITY)
-        return await self.command(device.id, VERB_SET_CHAMBER_LED_INTENSITY, {name: round(percent)})
+        name = _value_argument(device, VERB_SET_CHAMBER_LIGHT)
+        return await self.command(device.id, VERB_SET_CHAMBER_LIGHT, {name: min(max(round(percent), 0), 100)})
 
     # -- files ---------------------------------------------------------------
 

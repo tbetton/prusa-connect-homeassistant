@@ -15,7 +15,7 @@ from homeassistant.util.color import brightness_to_value, value_to_brightness
 from .coordinator import PrusaConnectConfigEntry, PrusaConnectCoordinator
 from .entity import PrusaConnectEntity, async_add_entities_as_found
 from .helpers import command
-from .library import VERB_SET_CHAMBER_LED_INTENSITY, Device
+from .library import VERB_SET_CHAMBER_LIGHT, Device
 
 PARALLEL_UPDATES = 1
 
@@ -24,11 +24,9 @@ _SCALE = (1, 100)
 
 
 def _entities(coordinator: PrusaConnectCoordinator, device: Device) -> Iterator[Entity]:
-    if (
-        device.may("operate")
-        and device.supports(VERB_SET_CHAMBER_LED_INTENSITY)
-        and device.chamber_led_intensity is not None
-    ):
+    # An XL takes the light and never reports it: its state stays unknown
+    # until it is set from here.
+    if device.may("operate") and device.supports(VERB_SET_CHAMBER_LIGHT):
         yield ChamberLight(coordinator, device)
 
 
@@ -56,7 +54,7 @@ class ChamberLight(PrusaConnectEntity, LightEntity):
     @property
     def _intensity(self) -> int | None:
         device = self.device
-        intensity = device.chamber_led_intensity if device else None
+        intensity = device.chamber_light if device else None
         if intensity:
             self._last_on = intensity
         return intensity

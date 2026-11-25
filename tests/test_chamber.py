@@ -23,6 +23,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.typing import ClientSessionGenerator
 
 from custom_components.prusa_connect.const import DOMAIN
+from custom_components.prusa_connect.library import Device
 
 from .conftest import CORE_ONE, INSTANCE, KLIPPER, XL, FakeClient
 from .helpers import flush, telemetry
@@ -63,11 +64,15 @@ async def test_chamber_entities(hass: HomeAssistant, setup_integration: MockConf
     for platform, key in (
         ("sensor", "chamber_temperature"),
         ("number", "chamber_target_temperature"),
-        ("light", "chamber_light"),
         ("fan", "chamber_fan"),
     ):
         assert not _has(hass, platform, XL, key)
         assert not _has(hass, platform, KLIPPER, key)
+    # An XL takes the light and never reports it: the state stays unknown.
+    xl_light = hass.states.get(_entity_id(hass, "light", XL, "chamber_light"))
+    assert xl_light is not None
+    assert xl_light.state == "unknown"
+    assert not _has(hass, "light", KLIPPER, "chamber_light")
     # Flow needs the verb: the XL has it, the Klipper driver does not.
     assert _has(hass, "number", XL, "flow")
     assert not _has(hass, "number", KLIPPER, "flow")
@@ -191,4 +196,6 @@ async def test_observe_only_token_gets_no_chamber_controls(
     assert hass.states.async_entity_ids("light") == []
     assert hass.states.async_entity_ids("fan") == []
     assert hass.states.async_entity_ids("image") == []
+    core_one = Device.from_dict(mock_client.record(CORE_ONE))
+    assert core_one.chamber_max_temp == 55
     assert _has(hass, "sensor", CORE_ONE, "chamber_temperature")

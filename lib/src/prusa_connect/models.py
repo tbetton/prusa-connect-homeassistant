@@ -28,12 +28,12 @@ VERB_SET_NOZZLE_TEMPERATURE = "core.command.set_nozzle_temperature"
 VERB_SET_BED_TEMPERATURE = "core.command.set_bed_temperature"
 VERB_SET_SPEED = "core.command.set_speed"
 VERB_SET_FLOW = "core.command.set_flow"
-VERB_SET_CHAMBER_TARGET_TEMP = "core.command.set_chamber_target_temp"
-VERB_SET_CHAMBER_FAN_TARGET = "core.command.set_chamber_fan_target"
-VERB_SET_CHAMBER_LED_INTENSITY = "core.command.set_chamber_led_intensity"
+VERB_SET_CHAMBER_TEMPERATURE = "core.command.set_chamber_target_temp"
+VERB_SET_CHAMBER_FAN = "core.command.set_chamber_fan_target"
+VERB_SET_CHAMBER_LIGHT = "core.command.set_chamber_led_intensity"
 
 # The chamber fan target that hands the fans back to the printer's own control.
-CHAMBER_FAN_AUTO = -1
+CHAMBER_FAN_AUTOMATIC = -1
 
 # The argument that names the head a per-tool verb addresses. Its value is the
 # 0-based head index, the same number as the head's tool id.
@@ -509,7 +509,18 @@ class Device:
 
     @property
     def chamber_target_temp(self) -> float | None:
+        """The chamber's target. ``0`` means no target.
+
+        The chamber has fans and no heater, so the target is the temperature
+        the fans hold the air under, and only while they run on their own.
+        """
         return _float(self.state.get("/temperature/chamber_target"))
+
+    @property
+    def chamber_max_temp(self) -> int:
+        """The highest chamber target the model takes: 60 on a CORE One L, 55 on a CORE One."""
+        folded = "".join(c for c in self.model.lower() if c.isalnum())
+        return 60 if folded.startswith("coreonel") else 55
 
     def chamber_fan_rpm(self, fan: int) -> int | None:
         """The speed of one chamber fan (``1`` or ``2``), in revolutions per minute."""
@@ -517,11 +528,11 @@ class Device:
 
     @property
     def chamber_fan_target(self) -> int | None:
-        """The chamber fan target in percent, or :data:`CHAMBER_FAN_AUTO`."""
+        """The chamber fan target in percent, or :data:`CHAMBER_FAN_AUTOMATIC`."""
         return _int(self.state.get("/chamber/fan_pwm_target"))
 
     @property
-    def chamber_led_intensity(self) -> int | None:
+    def chamber_light(self) -> int | None:
         """The chamber light intensity, in percent. ``0`` is a light that is off."""
         return _int(self.state.get("/chamber/led_intensity"))
 

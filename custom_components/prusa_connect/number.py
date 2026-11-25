@@ -28,7 +28,7 @@ from .helpers import command
 from .library import (
     ARG_TOOL,
     VERB_SET_BED_TEMPERATURE,
-    VERB_SET_CHAMBER_TARGET_TEMP,
+    VERB_SET_CHAMBER_TEMPERATURE,
     VERB_SET_FLOW,
     VERB_SET_NOZZLE_TEMPERATURE,
     VERB_SET_SPEED,
@@ -45,6 +45,8 @@ class PrinterNumberDescription(NumberEntityDescription):
     verb: str
     value_fn: Callable[[Device], float | None]
     set_fn: Callable[[PrusaConnect, Device, float], Coroutine[Any, Any, Any]]
+    # The model's own ceiling, where it differs from native_max_value.
+    max_fn: Callable[[Device], float] | None = None
 
 
 BED_TARGET = PrinterNumberDescription(
@@ -84,18 +86,22 @@ FLOW = PrinterNumberDescription(
     value_fn=lambda d: d.flow,
     set_fn=lambda client, device, value: client.set_flow(device, value),
 )
+# The chamber has fans and no heater, so its target is the temperature the
+# fans hold the air under, and only while they run on their own. The printer
+# takes up to 55 C on a CORE One and up to 60 C on a CORE One L.
 CHAMBER_TARGET = PrinterNumberDescription(
     key="chamber_target_temperature",
     translation_key="chamber_target_temperature",
     device_class=NumberDeviceClass.TEMPERATURE,
     native_unit_of_measurement=UnitOfTemperature.CELSIUS,
     native_min_value=0,
-    native_max_value=55,
+    native_max_value=60,
     native_step=1,
     mode=NumberMode.BOX,
-    verb=VERB_SET_CHAMBER_TARGET_TEMP,
+    verb=VERB_SET_CHAMBER_TEMPERATURE,
     value_fn=lambda d: d.chamber_target_temp,
     set_fn=lambda client, device, value: client.set_chamber_temperature(device, value),
+    max_fn=lambda d: d.chamber_max_temp,
 )
 NOZZLE_TARGET = NumberEntityDescription(
     key="nozzle_target_temperature",
@@ -154,6 +160,14 @@ class PrinterNumber(PrusaConnectEntity, NumberEntity):
     def native_value(self) -> float | None:
         device = self.device
         return self.entity_description.value_fn(device) if device else None
+
+    @property
+    def native_max_value(self) -> float:
+        device = self.device
+        max_fn = self.entity_description.max_fn
+        if device is not None and max_fn is not None:
+            return max_fn(device)
+        return super().native_max_value
 
     @command
     async def async_set_native_value(self, value: float) -> None:
